@@ -1,21 +1,22 @@
-package sr.obep.abstration;
+package sr.obep.implementations;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.semanticweb.HermiT.Configuration;
-import org.semanticweb.HermiT.Reasoner;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
+import openllet.owlapi.OpenlletReasonerFactory;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.NodeSet;
-import sr.obep.OBEPEngine;
-import sr.obep.SemanticEvent;
-import sr.obep.querying.OBEPQuery;
-import sr.obep.querying.OBEPQueryImpl;
+import org.semanticweb.owlapi.model.parameters.Imports;
+import org.semanticweb.owlapi.model.parameters.OntologyCopy;
+import org.semanticweb.owlapi.reasoner.OWLReasoner;
+import sr.obep.interfaces.Abstracter;
+import sr.obep.interfaces.EventProcessor;
+import sr.obep.interfaces.Explainer;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by pbonte on 03/11/2016.
@@ -25,56 +26,50 @@ import java.util.Set;
 @Getter
 public class AbstracterImpl implements Abstracter {
 
-    private OWLOntology ontology;
-    private Reasoner reasoner;
-    private OWLOntologyManager manager;
-    private Set<String> eventDefinitions;
-    private OBEPEngine obep;
+    private final OWLOntology tbox;
+    private final Explainer explainer;
+    private EventProcessor next;
 
-    public AbstracterImpl() {
-        eventDefinitions = new HashSet<String>();
-    }
-
-    public void init(OBEPEngine obep) {
-        this.obep = obep;
+    public AbstracterImpl(OWLOntology tbox) {
+        this.tbox = tbox;
+        explainer = new ExplainerImpl();
     }
 
     @Override
-    public void setOntology(OWLOntology o) {
-        this.ontology = o;
-        this.manager = o.getOWLOntologyManager();
-        Configuration conf = new Configuration();
-        this.reasoner = new Reasoner(conf, ontology);
-    }
+    public List<SemanticEvent> lift(SemanticEvent abox) {
+        final OWLOntologyManager manager = tbox.getOWLOntologyManager();
+        List<SemanticEvent> res = new ArrayList<>();
 
-    @Override
-    public void registerQuery(OBEPQuery q) {
-        for (OWLEquivalentClassesAxiom eventDef : q.getEventDefinitions()) {
-            manager.addAxiom(ontology, eventDef);
-            eventDef.namedClasses().forEach(def -> eventDefinitions.add(def.getIRI().toString()));
+        try {
+
+            OWLOntology copy = manager.copyOntology(tbox, OntologyCopy.DEEP);
+            OWLReasoner reasoner = OpenlletReasonerFactory.getInstance().createReasoner(copy);
+            copy.add(abox.getAxioms());
+            reasoner.flush();
+
+            OWLNamedIndividual message = abox.getMessage();
+            reasoner.getTypes(message, false).entities().forEach(c -> {
+                SemanticEvent e = new SemanticEvent(copy.aboxAxioms(Imports.EXCLUDED).collect(Collectors.toSet()), message, abox.getTimeStamp(), c.toStringID());
+                e.setType(c);
+                res.add(e);
+            });
+
+        } catch (OWLOntologyCreationException e) {
+            e.printStackTrace();
         }
-        reasoner.flush();
-    }
-
-    @Override
-    public void sendEvent(SemanticEvent se) {
-        Set<String> triggeredFilters = new HashSet<String>();
-        // add event to ontology
-        manager.addAxioms(ontology, se.getAxioms());
-        // extract types event
-        reasoner.flush();
-
-        NodeSet<OWLClass> inferedClasses = reasoner.getTypes(se.getMessage(), false);
-        for (OWLClass owlclss : inferedClasses.getFlattened()) {
-            String clss = owlclss.getIRI().toString();
-            if (eventDefinitions.contains(clss)) {
-                triggeredFilters.add(clss);
-            }
-        }
-        se.setTriggeredFilterIRIs(triggeredFilters);
 
         //send event back to engie
-        obep.sendEvent(se);
+        return res;
+    }
+
+    @Override
+    public void send(SemanticEvent e) {
+        lift(e).forEach(next::send);
+    }
+
+    @Override
+    public EventProcessor pipe(EventProcessor p) {
+        return this.next = p;
     }
 
 }

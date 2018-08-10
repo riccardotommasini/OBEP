@@ -25,7 +25,7 @@ import java.util.*;
  */
 @Data
 @NoArgsConstructor
-public class OBEPQueryImpl extends SPARQLQuery implements OBEPQuery {
+public class OBEPQueryImpl extends SPARQLQuery {
 
     protected VarExprList MQLprojectVars = new VarExprList();
     private Map<Node, EventDecl> eventDeclarations;
@@ -121,7 +121,4 @@ public class OBEPQueryImpl extends SPARQLQuery implements OBEPQuery {
         return eventDeclarations.get(peek);
     }
 
-    public Set<OWLEquivalentClassesAxiom> getEventDefinitions() {
-        return Collections.EMPTY_SET;
-    }
 }
