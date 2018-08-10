@@ -3,13 +3,13 @@ package sr.obep.abstraction;
 import org.apache.jena.query.Query;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
-import sr.obep.querying.OBEPQuery;
+import sr.obep.programming.Program;
 
 import java.util.HashSet;
 import java.util.Set;
 
 
-public class OBEPQueryAbstracterTest implements OBEPQuery {
+public class OBEPQueryAbstracterTest implements Program {
     private static final String ONT_SSNIOT_IRI = "http://IBCNServices.github.io/Accio-Ontology/SSNiot#";
     private static final String ONT_DUL_IRI = "http://IBCNServices.github.io/Accio-Ontology/ontologies/DUL.owl#";
     private static final String ONT_SSN_IRI = "http://IBCNServices.github.io/Accio-Ontology/ontologies/ssn#";

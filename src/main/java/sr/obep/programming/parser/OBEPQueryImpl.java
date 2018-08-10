@@ -1,4 +1,4 @@
-package sr.obep.querying;
+package sr.obep.programming.parser;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,10 +13,9 @@ import org.apache.jena.sparql.core.VarExprList;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.graph.NodeConst;
 import org.apache.jena.sparql.syntax.*;
-import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
-import sr.obep.parser.delp.EventCalculusDecl;
-import sr.obep.parser.delp.EventDecl;
-import sr.obep.parser.sparql.SPARQLQuery;
+import sr.obep.programming.parser.delp.EventCalculusDecl;
+import sr.obep.programming.parser.delp.EventDecl;
+import sr.obep.programming.parser.sparql.SPARQLQuery;
 
 import java.util.*;
 

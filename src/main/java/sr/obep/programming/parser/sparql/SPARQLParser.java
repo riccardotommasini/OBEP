@@ -1,4 +1,4 @@
-package sr.obep.parser.sparql;
+package sr.obep.programming.parser.sparql;
 
 import org.apache.jena.atlas.lib.EscapeStr;
 import org.apache.jena.datatypes.xsd.XSDDatatype;

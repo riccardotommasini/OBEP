@@ -1,4 +1,4 @@
-package sr.obep.implementations;
+package sr.obep.explanation;
 
 import openllet.owlapi.OpenlletReasoner;
 import openllet.owlapi.OpenlletReasonerFactory;
@@ -9,8 +9,8 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
-import sr.obep.interfaces.EventProcessor;
-import sr.obep.interfaces.Explainer;
+import sr.obep.data.events.SemanticEvent;
+import sr.obep.processors.EventProcessor;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

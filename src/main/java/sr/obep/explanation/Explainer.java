@@ -1,4 +1,4 @@
-package sr.obep.interfaces;
+package sr.obep.explanation;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;

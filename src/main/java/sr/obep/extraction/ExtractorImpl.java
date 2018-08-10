@@ -1,19 +1,13 @@
 package sr.obep.extraction;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.jena.ontology.OntModel;
-import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.*;
-import sr.obep.OBEPEngine;
-import sr.obep.SemanticEvent;
-import sr.obep.querying.OBEPQuery;
-import sr.obep.querying.OBEPQueryImpl;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import sr.obep.data.events.SemanticEvent;
+import sr.obep.processors.EventProcessor;
 
-import java.io.*;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -23,27 +17,37 @@ import java.util.Map.Entry;
 @Slf4j
 public class ExtractorImpl implements Extractor {
 
-    private OBEPEngine obep;
     private OWLOntologyManager manager;
-    private OWLOntology ontology;
     private List<Query> queries;
+    private EventProcessor next;
 
     public ExtractorImpl() {
-        queries = new ArrayList<Query>();
+        queries = new ArrayList<>();
         manager = OWLManager.createOWLOntologyManager();
     }
 
-    private static ResultSet sparqlQuery(Model model, Query query) {
-        QueryExecution qExec = QueryExecutionFactory.create(query, model);
-        return qExec.execSelect();
+    @Override
+    public SemanticEvent extract(SemanticEvent se) {
+        Map<String, String> props = new HashMap<>();
+        for (Query q : queries) {
+            List<Map<String, String>> results = exec(se.getData(), q);
+            for (Map<String, String> resultItem : results) {
+                for (Entry<String, String> entry : resultItem.entrySet()) {
+                    props.put(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+        se.setProperties(props);
+        return se;
     }
 
-    protected static List<Map<String, String>> exec(Model model, Query query) {
-        List<Map<String, String>> results = new ArrayList<Map<String, String>>();
+    private static List<Map<String, String>> exec(Model model, Query sparql) {
+        List<Map<String, String>> results = new ArrayList<>();
+        QueryExecution qExec = QueryExecutionFactory.create(sparql, model);
+        ResultSet result = qExec.execSelect();
 
-        ResultSet result = sparqlQuery(model, query);
         while (result != null && result.hasNext()) {
-            Map<String, String> tempMap = new HashMap<String, String>();
+            Map<String, String> tempMap = new HashMap<>();
 
             QuerySolution solution = result.next();
             Iterator<String> it = solution.varNames();
@@ -65,94 +69,13 @@ public class ExtractorImpl implements Extractor {
         return results;
     }
 
-    protected static OWLOntology getOWLOntology(final Model model) {
-        OWLOntology ontology;
-        try (PipedInputStream is = new PipedInputStream(); PipedOutputStream os = new PipedOutputStream(is)) {
-            OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    model.write(os, "TURTLE", null);
-                    try {
-                        os.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }).start();
-            ontology = man.loadOntologyFromOntologyDocument(is);
-            return ontology;
-        } catch (Exception e) {
-            throw new RuntimeException("Could not convert JENA API model to OWL API ontology.", e);
-        }
+    @Override
+    public void send(SemanticEvent e) {
+        next.send(extract(e));
     }
 
     @Override
-    public void init(OBEPEngine obep) {
-        this.obep = obep;
-
-    }
-
-    @Override
-    public void registerQuery(OBEPQuery q) {
-
-    }
-
-    @Override
-    public void setOntology(OWLOntology o) {
-
-    }
-
-    @Override
-    public void sendEvent(SemanticEvent se) {
-        Map<String, String> props = new HashMap<String, String>();
-        for (Query q : queries) {
-            List<Map<String, String>> results = query(se.getAxioms(), q);
-            for (Map<String, String> resultItem : results) {
-                for (Entry<String, String> entry : resultItem.entrySet()) {
-                    props.put(entry.getKey(), entry.getValue());
-                }
-            }
-        }
-        se.setProperties(props);
-        obep.sendEvent(se);
-    }
-
-    public List<Map<String, String>> query(Set<OWLAxiom> event, Query query) {
-        OWLOntology tempOnt;
-        List<Map<String, String>> results = null;
-        try {
-            tempOnt = manager.createOntology();
-            manager.addAxioms(tempOnt, event);
-            OntModel tempModel = getOntologyModel(manager, tempOnt);
-            results = exec(tempModel, query);
-        } catch (OWLOntologyCreationException e) {
-            log.error("Unable to create ontology");
-
-        }
-
-        return results;
-    }
-
-    protected OntModel getOntologyModel(OWLOntologyManager manager, OWLOntology ontology) {
-        OntModel noReasoningModel = null;
-
-        noReasoningModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
-        noReasoningModel.getDocumentManager().setProcessImports(false);
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-        try {
-            manager.saveOntology(ontology, out);
-        } catch (OWLOntologyStorageException e) {
-            log.error("Unable to write ontology to stream");
-        }
-
-        try {
-            noReasoningModel.read(new ByteArrayInputStream(out.toByteArray()), "RDF/XML");
-        } catch (Exception e) {
-            log.error("Problems reading stream. Might be ignored");
-        }
-
-        return noReasoningModel;
+    public EventProcessor pipe(EventProcessor p) {
+        return this;
     }
 }

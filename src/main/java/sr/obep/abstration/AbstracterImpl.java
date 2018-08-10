@@ -1,4 +1,4 @@
-package sr.obep.implementations;
+package sr.obep.abstration;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -10,9 +10,10 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.parameters.Imports;
 import org.semanticweb.owlapi.model.parameters.OntologyCopy;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
-import sr.obep.interfaces.Abstracter;
-import sr.obep.interfaces.EventProcessor;
-import sr.obep.interfaces.Explainer;
+import sr.obep.data.events.SemanticEvent;
+import sr.obep.explanation.ExplainerImpl;
+import sr.obep.processors.EventProcessor;
+import sr.obep.explanation.Explainer;
 
 import java.util.ArrayList;
 import java.util.List;

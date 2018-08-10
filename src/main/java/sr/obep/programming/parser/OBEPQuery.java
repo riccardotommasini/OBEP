@@ -1,4 +1,4 @@
-package sr.obep.querying;
+package sr.obep.programming.parser;
 
 import org.apache.jena.query.Query;
 import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;

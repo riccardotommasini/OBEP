@@ -8,8 +8,8 @@ import org.parboiled.errors.ParseError;
 import org.parboiled.parserunners.ReportingParseRunner;
 import org.parboiled.support.ParsingResult;
 import sr.obep.abstraction.OBEPTestEngine;
-import sr.obep.parser.delp.DELPParser;
-import sr.obep.querying.OBEPQuery;
+import sr.obep.programming.parser.delp.DELPParser;
+import sr.obep.programming.Program;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +29,7 @@ public class EventProcessingTest extends TestCase {
 
         parser.setResolver(IRIResolver.create());
 
-        ParsingResult<OBEPQuery> result = new ReportingParseRunner(parser.Query()).run(input);
+        ParsingResult<Program> result = new ReportingParseRunner(parser.Query()).run(input);
 
         if (result.hasErrors()) {
             System.out.println("Errors have been found!");
@@ -38,7 +38,7 @@ public class EventProcessingTest extends TestCase {
             }
         }
 
-        OBEPQuery q = result.resultValue;
+        Program q = result.resultValue;
         cep.registerQuery(q);
     }
 

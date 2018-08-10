@@ -1,22 +1,12 @@
 package sr.obep.cep;
 
 import com.espertech.esper.client.*;
-import com.espertech.esper.client.soda.EPStatementObjectModel;
 import lombok.extern.log4j.Log4j;
-import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
-import org.apache.jena.sparql.core.Var;
-import org.apache.jena.sparql.lang.SyntaxVarScope;
-import sr.obep.OBEPEngine;
-import sr.obep.SemanticEvent;
-import sr.obep.parser.delp.DLEventDecl;
-import sr.obep.parser.delp.EventCalculusDecl;
-import sr.obep.parser.delp.EventDecl;
-import sr.obep.parser.delp.IFDecl;
-import sr.obep.querying.OBEPQuery;
-import sr.obep.querying.OBEPQueryImpl;
+import sr.obep.data.SemanticEvent;
+import sr.obep.programming.parser.delp.EventDecl;
+import sr.obep.programming.Program;
 
-import javax.xml.stream.EventFilter;
 import java.util.*;
 
 /**
@@ -63,7 +53,7 @@ public class EventProcessorImpl implements EventProcessor {
     }
 
     public void init(OBEPEngine obep) {
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put("packedId", "string");
 
         Class<SemanticEvent> value = SemanticEvent.class;
@@ -83,47 +73,9 @@ public class EventProcessorImpl implements EventProcessor {
     }
 
 
-    public void registerQuery(OBEPQuery query) {
-        this.filterQueries = new HashMap<EventDecl, Query>();
+    public void registerQuery(Program query) {
+        this.filterQueries = new HashMap<>();
 
-        OBEPQueryImpl q = (OBEPQueryImpl) query;
-
-        if (q.getEventDeclarations() != null) {
-            Map<Node, EventDecl> eventDeclarations = q.getEventDeclarations();
-            Set<Map.Entry<Node, EventDecl>> entries = eventDeclarations.entrySet();
-            for (Map.Entry<Node, EventDecl> entry : entries) {
-                EventDecl value = entry.getValue();
-
-                if (value instanceof EventCalculusDecl) {
-
-                    EventCalculusDecl e = (EventCalculusDecl) value;
-                    System.out.println(e.toString());
-
-                    Set<Var> joinVariables = e.getJoinVariables();
-
-                    if (q.getEventDeclarations() != null) {
-                        for (Map.Entry<Node, EventDecl> en : entries) {
-                            EventDecl v = en.getValue();
-
-                            if (v instanceof DLEventDecl) {
-                                DLEventDecl dl = (DLEventDecl) v;
-
-                                String s = dl.toEPLSchema(joinVariables);
-                                System.out.println(s);
-                                cepAdm.createEPL(s);
-
-                            }
-
-                        }
-                    }
-
-                    EPStatementObjectModel epStatementObjectModel = e.toEpl();
-                    System.out.println(epStatementObjectModel.toEPL());
-                    cepAdm.create(epStatementObjectModel);
-                }
-
-            }
-        }
 
 
     }

@@ -1,4 +1,4 @@
-package sr.obep.parser.delp;
+package sr.obep.programming.parser.delp;
 
 import com.espertech.esper.client.soda.CreateSchemaClause;
 import com.espertech.esper.client.soda.SchemaColumnDesc;

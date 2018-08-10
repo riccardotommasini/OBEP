@@ -1,6 +1,7 @@
-package sr.obep.interfaces;
+package sr.obep.extraction;
 
-import sr.obep.implementations.SemanticEvent;
+import sr.obep.data.events.SemanticEvent;
+import sr.obep.processors.EventProcessor;
 
 /**
  * Created by pbonte on 03/11/2016.

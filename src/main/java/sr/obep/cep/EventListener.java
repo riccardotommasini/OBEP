@@ -4,7 +4,7 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.UpdateListener;
 import com.espertech.esper.event.map.MapEventBean;
 import lombok.extern.log4j.Log4j;
-import sr.obep.SemanticEvent;
+import sr.obep.data.SemanticEvent;
 
 import java.util.ArrayList;
 import java.util.List;

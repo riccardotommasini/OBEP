@@ -1,6 +1,7 @@
-package sr.obep.interfaces;
+package sr.obep.abstration;
 
-import sr.obep.implementations.SemanticEvent;
+import sr.obep.data.events.SemanticEvent;
+import sr.obep.processors.EventProcessor;
 
 import java.util.List;
 

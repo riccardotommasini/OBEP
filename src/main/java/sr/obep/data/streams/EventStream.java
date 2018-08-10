@@ -1,4 +1,4 @@
-package sr.obep.data;
+package sr.obep.data.streams;
 
 import sr.obep.processors.EventProcessor;
 

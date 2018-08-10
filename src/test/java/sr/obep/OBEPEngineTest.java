@@ -7,11 +7,11 @@ import org.parboiled.Parboiled;
 import org.parboiled.errors.ParseError;
 import org.parboiled.parserunners.ReportingParseRunner;
 import org.parboiled.support.ParsingResult;
-import sr.obep.parser.delp.DELPParser;
-import sr.obep.parser.delp.EventCalculusDecl;
-import sr.obep.parser.delp.EventDecl;
-import sr.obep.querying.OBEPQuery;
-import sr.obep.querying.OBEPQueryImpl;
+import sr.obep.programming.parser.delp.DELPParser;
+import sr.obep.programming.parser.delp.EventCalculusDecl;
+import sr.obep.programming.parser.delp.EventDecl;
+import sr.obep.programming.Program;
+import sr.obep.programming.parser.OBEPQueryImpl;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +26,7 @@ public class OBEPEngineTest extends TestCase {
 
         parser.setResolver(IRIResolver.create());
 
-        ParsingResult<OBEPQuery> result = new ReportingParseRunner(parser.Query()).run(input);
+        ParsingResult<Program> result = new ReportingParseRunner(parser.Query()).run(input);
 
         if (result.hasErrors()) {
             System.out.println("Errors have been found!");

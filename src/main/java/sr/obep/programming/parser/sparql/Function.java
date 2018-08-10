@@ -1,4 +1,4 @@
-package sr.obep.parser.sparql;
+package sr.obep.programming.parser.sparql;
 
 import org.apache.jena.graph.Node_URI;
 import org.apache.jena.sparql.expr.E_Function;

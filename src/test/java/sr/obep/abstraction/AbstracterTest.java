@@ -4,10 +4,10 @@ import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.formats.N3DocumentFormat;
 import org.semanticweb.owlapi.model.*;
-import sr.obep.SemanticEvent;
+import sr.obep.data.SemanticEvent;
 import sr.obep.abstration.Abstracter;
 import sr.obep.abstration.AbstracterImpl;
-import sr.obep.querying.OBEPQuery;
+import sr.obep.programming.Program;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -188,7 +188,7 @@ public class AbstracterTest extends TestCase {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         try {
             o = manager.loadOntology(IRI.create("http://IBCNServices.github.io/Accio-Ontology/SSNiot.owl#"));
-            abstracter.setOntology(o);
+            abstracter.setTBOX(o);
         } catch (OWLOntologyCreationException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -199,7 +199,7 @@ public class AbstracterTest extends TestCase {
     }
 
     public void testAddQuery() {
-        OBEPQuery query = new OBEPQueryAbstracterTest();
+        Program query = new OBEPQueryAbstracterTest();
         Set<String> registeredQueries = new HashSet<String>();
         for (OWLEquivalentClassesAxiom eventDef : query.getEventDefinitions()) {
             eventDef.namedClasses().forEach(def -> registeredQueries.add(def.getIRI().toString()));
@@ -207,7 +207,7 @@ public class AbstracterTest extends TestCase {
         int ontSize = o.getAxiomCount();
         abstracter.registerQuery(query);
         assertNotSame(ontSize, o.getAxiomCount());
-        abstracter.sendEvent(createTempEvent());
+        abstracter.lift(createTempEvent());
 
         assertEquals(1, testEngine.getReceivedEvent().getTriggeredFilterIRIs().size());
         assertEquals("[http://IBCNServices.github.io/Accio-Ontology/SSNiot#TemperatureFilter]", testEngine.getReceivedEvent().getTriggeredFilterIRIs().toString());

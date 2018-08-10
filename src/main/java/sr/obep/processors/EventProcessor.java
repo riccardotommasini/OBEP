@@ -1,6 +1,7 @@
-package sr.obep.interfaces;
+package sr.obep.processors;
 
-import sr.obep.implementations.SemanticEvent;
+
+import sr.obep.data.events.SemanticEvent;
 
 /**
  * Created by Riccardo on 03/11/2016.

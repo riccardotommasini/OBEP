@@ -2,11 +2,9 @@ package sr.obep.abstraction;
 
 import lombok.Getter;
 import org.semanticweb.owlapi.model.OWLOntology;
-import sr.obep.OBEPEngine;
-import sr.obep.SemanticEvent;
-import sr.obep.querying.OBEPQuery;
-import sr.obep.querying.OBEPQueryImpl;
-import sr.obep.querying.QueryConsumer;
+import sr.obep.data.SemanticEvent;
+import sr.obep.programming.parser.OBEPQueryImpl;
+import sr.obep.programming.parser.QueryConsumer;
 
 @Getter
 public class OBEPTestEngine implements OBEPEngine {

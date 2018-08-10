@@ -1,4 +1,4 @@
-package sr.obep.parser.sparql;
+package sr.obep.programming.parser.sparql;
 
 import lombok.Data;
 import org.apache.jena.sparql.core.Var;

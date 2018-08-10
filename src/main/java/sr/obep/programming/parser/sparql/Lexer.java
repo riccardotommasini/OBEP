@@ -1,4 +1,4 @@
-package sr.obep.parser.sparql;
+package sr.obep.programming.parser.sparql;
 
 import org.parboiled.Rule;
 import org.parboiled.annotations.BuildParseTree;

@@ -1,4 +1,4 @@
-package sr.obep.parser.delp;
+package sr.obep.programming.parser.delp;
 
 import lombok.Data;
 import org.apache.jena.graph.Node;

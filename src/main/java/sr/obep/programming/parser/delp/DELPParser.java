@@ -1,9 +1,9 @@
-package sr.obep.parser.delp;
+package sr.obep.programming.parser.delp;
 
 import org.apache.jena.graph.Node;
 import org.parboiled.Rule;
-import sr.obep.parser.sparql.SPARQLParser;
-import sr.obep.querying.OBEPQueryImpl;
+import sr.obep.programming.parser.sparql.SPARQLParser;
+import sr.obep.programming.parser.OBEPQueryImpl;
 
 /**
  * Created by Riccardo on 09/08/16.
