@@ -7,7 +7,7 @@ import org.parboiled.Parboiled;
 import org.parboiled.errors.ParseError;
 import org.parboiled.parserunners.ReportingParseRunner;
 import org.parboiled.support.ParsingResult;
-import sr.obep.data.LogicalEvent;
+import sr.obep.data.events.LogicalEvent;
 import sr.obep.programming.parser.delp.DELPParser;
 import sr.obep.programming.parser.delp.DLEventDecl;
 import sr.obep.programming.parser.delp.EventCalculusDecl;

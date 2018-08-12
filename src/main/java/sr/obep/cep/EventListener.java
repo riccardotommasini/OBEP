@@ -4,7 +4,7 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.UpdateListener;
 import com.espertech.esper.event.map.MapEventBean;
 import lombok.extern.log4j.Log4j;
-import sr.obep.data.SemanticEvent;
+import sr.obep.data.events.SemanticEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,7 @@ public class EventListener implements UpdateListener {
     public void update(EventBean[] newEvents, EventBean[] oldEvents) {
         // EventBean event = newEvents[0];
         log.info("EventListener update");
-        List<SemanticEvent> activatedEvents = new ArrayList<SemanticEvent>();
+        List<SemanticEvent> activatedEvents = new ArrayList<>();
         if (newEvents != null) {
             log.info("New events: (" + this + ") " + newEvents.length);
             for (EventBean e : newEvents) {

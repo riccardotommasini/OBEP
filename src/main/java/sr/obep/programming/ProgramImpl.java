@@ -1,8 +1,8 @@
 package sr.obep.programming;
 
-import sr.obep.data.CompositeEvent;
+import sr.obep.data.events.CompositeEvent;
+import sr.obep.data.events.LogicalEvent;
 import sr.obep.data.streams.EventStream;
-import sr.obep.data.LogicalEvent;
 import sr.obep.programming.parser.sparql.Prefix;
 
 import java.util.HashSet;

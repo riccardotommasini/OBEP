@@ -1,10 +1,9 @@
-package sr.obep.extraction;
+package sr.obep.normalization;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.Model;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.OWLClass;
 import sr.obep.data.events.SemanticEvent;
 import sr.obep.processors.EventProcessor;
 
@@ -15,30 +14,37 @@ import java.util.Map.Entry;
  * Created by pbonte on 03/11/2016.
  */
 @Slf4j
-public class ExtractorImpl implements Extractor {
+public class SPARQLNormalizer implements Normalizer {
 
-    private OWLOntologyManager manager;
-    private List<Query> queries;
     private EventProcessor next;
+    private final Map<OWLClass, Query> queries;
+    private final String extractor_time = "timestamp.normalizer";
 
-    public ExtractorImpl() {
-        queries = new ArrayList<>();
-        manager = OWLManager.createOWLOntologyManager();
+    public SPARQLNormalizer(Map<OWLClass, Query> queries) {
+        this.queries = queries;
+    }
+
+    public SPARQLNormalizer() {
+        this(new HashMap<>());
     }
 
     @Override
-    public SemanticEvent extract(SemanticEvent se) {
-        Map<String, String> props = new HashMap<>();
-        for (Query q : queries) {
-            List<Map<String, String>> results = exec(se.getData(), q);
-            for (Map<String, String> resultItem : results) {
-                for (Entry<String, String> entry : resultItem.entrySet()) {
-                    props.put(entry.getKey(), entry.getValue());
-                }
+    public SemanticEvent normalize(SemanticEvent se) {
+        List<Map<String, String>> results = exec(se.getContent().asRDFModel(), queries.get(se.getType()));
+        for (Map<String, String> resultItem : results) {
+            for (Entry<String, String> entry : resultItem.entrySet()) {
+                //adding the property to the event using the variable name as key
+                se.put(entry.getKey(), entry.getValue());
+
             }
         }
-        se.setProperties(props);
+        se.put(extractor_time, System.currentTimeMillis());
         return se;
+    }
+
+    @Override
+    public void addNormalizationQuery(OWLClass c, Query q) {
+        queries.put(c, q);
     }
 
     private static List<Map<String, String>> exec(Model model, Query sparql) {
@@ -71,11 +77,11 @@ public class ExtractorImpl implements Extractor {
 
     @Override
     public void send(SemanticEvent e) {
-        next.send(extract(e));
+        next.send(normalize(e));
     }
 
     @Override
     public EventProcessor pipe(EventProcessor p) {
-        return this;
+        return next = p;
     }
 }

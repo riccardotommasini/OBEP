@@ -1,9 +1,11 @@
 package sr.obep.abstration;
 
-import sr.obep.data.events.SemanticEvent;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLOntology;
 import sr.obep.processors.EventProcessor;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Riccardo on 03/11/2016.
@@ -11,6 +13,6 @@ import java.util.List;
 
 public interface Abstracter extends EventProcessor {
 
-    List<SemanticEvent> lift(SemanticEvent abox);
+    Set<OWLClass> lift(OWLOntology copy, OWLNamedIndividual event);
 
 }

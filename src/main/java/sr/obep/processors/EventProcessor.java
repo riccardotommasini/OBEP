@@ -12,5 +12,4 @@ public interface EventProcessor {
     void send(SemanticEvent e);
 
     EventProcessor pipe(EventProcessor p);
-
 }

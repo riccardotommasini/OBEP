@@ -7,8 +7,8 @@ import sr.obep.abstration.Abstracter;
 import sr.obep.abstration.AbstracterImpl;
 import sr.obep.explanation.Explainer;
 import sr.obep.explanation.ExplainerImpl;
-import sr.obep.extraction.Extractor;
-import sr.obep.extraction.ExtractorImpl;
+import sr.obep.normalization.Normalizer;
+import sr.obep.normalization.SPARQLNormalizer;
 import sr.obep.processors.CEP;
 import sr.obep.programming.Program;
 import sr.obep.programming.ProgramManager;
@@ -88,9 +88,9 @@ public class OBEPEngineImpl implements OBEPEngine {
 
 
             Explainer explainer = new ExplainerImpl();
-            Extractor extractor = new ExtractorImpl();
+            Normalizer normalizer = new SPARQLNormalizer();
 
-            abstracter.pipe(explainer).pipe(extractor).pipe(cep);
+            abstracter.pipe(explainer).pipe(normalizer).pipe(cep);
 
             //Physical Events
             //TODO register event stream schema?
@@ -113,7 +113,7 @@ public class OBEPEngineImpl implements OBEPEngine {
 //            abstracter.lift(se);
 //        }
 //        if (se.getTriggeredFilterIRIs() != null && !se.getTriggeredFilterIRIs().isEmpty() && se.getProperties() == null) {
-//            extractor.extract(se);
+//            extractor.normalize(se);
 //        }
 //        if (se.getProperties() != null) {
 //            cep.sendEvent(se);

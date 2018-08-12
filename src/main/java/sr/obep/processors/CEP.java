@@ -2,10 +2,7 @@ package sr.obep.processors;
 
 import com.espertech.esper.client.*;
 import lombok.extern.log4j.Log4j;
-import org.apache.jena.query.Query;
-import sr.obep.data.SemanticEvent;
-import sr.obep.exceptions.EventStreamManager;
-import sr.obep.programming.parser.delp.EventDecl;
+import sr.obep.data.events.SemanticEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,10 +14,8 @@ import java.util.Map;
 public class CEP implements EventProcessor, EventStreamManager {
 
     private EPServiceProvider epService;
-    private Map<EventDecl, Query> filterQueries;
     private EPAdministrator cepAdm;
     private final EPRuntime cep;
-    private final EPAdministrator adm;
 
     public CEP() {
         Map<String, Object> properties = new HashMap<>();
@@ -38,7 +33,7 @@ public class CEP implements EventProcessor, EventStreamManager {
 
         this.epService = EPServiceProviderManager.getDefaultProvider(configuration);
         this.cep = this.epService.getEPRuntime();
-        this.adm = this.epService.getEPAdministrator();
+        this.cepAdm = this.epService.getEPAdministrator();
 
     }
 
@@ -63,12 +58,7 @@ public class CEP implements EventProcessor, EventStreamManager {
         //TODO refactor the event definition
         se.getTriggeredFilterIRIs().forEach(trigger -> {
             String eventType = stripFilterName(trigger);
-            Map<String, Object> map = new HashMap<>();
-            map.put("packedId", se.getPacketID());
-            map.put("ts", System.currentTimeMillis());
-            map.put("content", se);
-            map.putAll(se.getProperties());
-            this.cep.sendEvent(map, eventType);
+            this.cep.sendEvent(se, eventType);
         });
     }
 

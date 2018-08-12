@@ -1,52 +1,96 @@
 package sr.obep.data.events;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.apache.jena.rdf.model.Model;
-import org.semanticweb.owlapi.model.OWLAxiom;
+import lombok.Setter;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 
 import java.io.Serializable;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * Created by Riccardo on 03/11/2016.
  */
-@Data
 @RequiredArgsConstructor
-public class SemanticEvent implements Serializable {
+public class SemanticEvent extends HashMap<String, Object> implements Serializable {
 
-    private OWLClass type;
-    @NonNull
-    private Set<OWLAxiom> axioms;
-    private Model data;
-    @NonNull
-    private OWLNamedIndividual message;
+    private static final String type = "event_type";
+    private static final String content = "event_content";
+    private static final String ingestion_time = "timestamp_sys";
+    private static final String event_time = "timestamp_event";
+
+    public SemanticEvent(String packetID) {
+        put(ingestion_time, System.currentTimeMillis());
+        this.packetID = packetID;
+        this.eventInvididual = OWLManager.createOWLOntologyManager().getOWLDataFactory().getOWLNamedIndividual(IRI.create(this.getPacketID()));
+
+    }
+
+    @Getter
     private String packetID;
-    private Set<String> triggeredFilterIRIs;
+
+    @Getter
+    private OWLNamedIndividual eventInvididual;
+
+    @Setter
+    @Getter
     @NonNull
     private long timeStamp;
+
+    @Setter
+    @Getter
     @NonNull
-    private String stream;
+    private String stream_uri;
+
+    @Getter
     private Map<String, String> properties;
+    @Getter
+    private Set<String> triggeredFilterIRIs;
 
-    public SemanticEvent(OWLNamedIndividual message, String packetID, long timeStamp, String stream) {
-        this.axioms = new HashSet<>();
-        this.message = message;
-        this.packetID = packetID;
-        this.timeStamp = timeStamp;
-        this.stream = stream;
+    public void setType(OWLClass c) {
+        put(type, c);
     }
 
-    public void addAxiom(OWLAxiom ax) {
-        this.axioms.add(ax);
+    public OWLClass getType() {
+        return (OWLClass) get(type);
     }
 
-    public Set<String> getTriggeredFilters() {
-        return null;
+    public Content getContent() {
+        return (Content) get(content);
+    }
+
+    public void setContent(Content c) {
+        put(content, c);
+    }
+
+    public SemanticEvent copy() {
+        SemanticEvent copy = new SemanticEvent(packetID);
+        this.keySet().forEach(k -> copy.put(k, get(k)));
+        return copy;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        SemanticEvent that = (SemanticEvent) o;
+        return Objects.equals(packetID, that.packetID) &&
+                Objects.equals(stream_uri, that.stream_uri) &&
+                Objects.equals(getContent(), that.getContent()) &&
+                Objects.equals(getType(), that.getType());
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(super.hashCode(), packetID, timeStamp, stream_uri, properties, triggeredFilterIRIs);
     }
 }

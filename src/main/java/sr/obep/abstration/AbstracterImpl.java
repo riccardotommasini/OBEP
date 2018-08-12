@@ -3,20 +3,17 @@ package sr.obep.abstration;
 import lombok.Getter;
 import lombok.Setter;
 import openllet.owlapi.OpenlletReasonerFactory;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.parameters.Imports;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.model.parameters.OntologyCopy;
+import org.semanticweb.owlapi.reasoner.InferenceDepth;
+import org.semanticweb.owlapi.reasoner.InferenceType;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
+import sr.obep.data.events.ContentImpl;
 import sr.obep.data.events.SemanticEvent;
-import sr.obep.explanation.ExplainerImpl;
 import sr.obep.processors.EventProcessor;
-import sr.obep.explanation.Explainer;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -28,44 +25,39 @@ import java.util.stream.Collectors;
 public class AbstracterImpl implements Abstracter {
 
     private final OWLOntology tbox;
-    private final Explainer explainer;
     private EventProcessor next;
+    private final String abstracter_time = "timestamp.abstracter";
 
     public AbstracterImpl(OWLOntology tbox) {
         this.tbox = tbox;
-        explainer = new ExplainerImpl();
     }
 
-    @Override
-    public List<SemanticEvent> lift(SemanticEvent abox) {
-        final OWLOntologyManager manager = tbox.getOWLOntologyManager();
-        List<SemanticEvent> res = new ArrayList<>();
+    public Set<OWLClass> lift(OWLOntology copy, OWLNamedIndividual event) {
+        OWLReasoner reasoner = OpenlletReasonerFactory.getInstance().createReasoner(copy);
+        reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY);
+        reasoner.flush();
+        return reasoner.getTypes(event, InferenceDepth.ALL).entities().collect(Collectors.toSet());
 
-        try {
-
-            OWLOntology copy = manager.copyOntology(tbox, OntologyCopy.DEEP);
-            OWLReasoner reasoner = OpenlletReasonerFactory.getInstance().createReasoner(copy);
-            copy.add(abox.getAxioms());
-            reasoner.flush();
-
-            OWLNamedIndividual message = abox.getMessage();
-            reasoner.getTypes(message, false).entities().forEach(c -> {
-                SemanticEvent e = new SemanticEvent(copy.aboxAxioms(Imports.EXCLUDED).collect(Collectors.toSet()), message, abox.getTimeStamp(), c.toStringID());
-                e.setType(c);
-                res.add(e);
-            });
-
-        } catch (OWLOntologyCreationException e) {
-            e.printStackTrace();
-        }
-
-        //send event back to engie
-        return res;
     }
 
     @Override
     public void send(SemanticEvent e) {
-        lift(e).forEach(next::send);
+        try {
+            final OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+            OWLOntology copy = manager.copyOntology(tbox, OntologyCopy.SHALLOW);
+            copy.add(e.getContent().asOWLAxioms());
+
+            lift(copy, e.getEventInvididual()).forEach(c -> {
+                SemanticEvent event = e.copy();
+                event.put(abstracter_time, System.currentTimeMillis());
+                event.setType(c);
+                event.setContent(new ContentImpl(copy));
+                next.send(event);
+            });
+
+        } catch (OWLOntologyCreationException e1) {
+            e1.printStackTrace();
+        }
     }
 
     @Override
