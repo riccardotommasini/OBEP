@@ -1,7 +1,6 @@
 package sr.obep.data.events;
 
 import lombok.ToString;
-import org.apache.jena.graph.Graph;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.rdf.model.Model;
@@ -30,11 +29,6 @@ public class ContentImpl implements Content {
         content(axioms);
     }
 
-    public ContentImpl(Model model) {
-        this.model = model;
-        //TODO conversion
-    }
-
     @Override
     public OWLOntology asOWLOntology() {
         return ontology;
@@ -43,20 +37,6 @@ public class ContentImpl implements Content {
     @Override
     public Set<OWLAxiom> asOWLAxioms() {
         return ontology.axioms().collect(Collectors.toSet());
-    }
-
-    @Override
-    public Model asRDFModel() {
-        return model;
-    }
-
-    @Override
-    public Graph asRDFGraph() {
-        return model.getGraph();
-    }
-
-    public void content(Model model) {
-        this.model = model;
     }
 
     public void content(Set<OWLAxiom> axioms) {

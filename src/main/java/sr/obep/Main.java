@@ -10,6 +10,7 @@ import sr.obep.engine.OBEPEngineFactory;
 import sr.obep.explanation.Explainer;
 import sr.obep.explanation.ExplainerImpl;
 import sr.obep.normalization.Normalizer;
+import sr.obep.normalization.SPARQLNormalForm;
 import sr.obep.normalization.SPARQLNormalizer;
 import sr.obep.processors.CEP;
 
@@ -22,7 +23,7 @@ public class Main {
         Explainer explainer = new ExplainerImpl();
         Normalizer normalizer = new SPARQLNormalizer(null);
 
-        normalizer.addNormalizationQuery(OWL.Thing, QueryFactory.create("SELECT * WHERE {?s ?p ?o}"));
+        normalizer.addNormalizationQuery(OWL.Thing, new SPARQLNormalForm(QueryFactory.create("SELECT * WHERE {?s ?p ?o}")));
 
         CEP runtime = new CEP();
 

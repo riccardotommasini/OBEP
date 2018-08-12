@@ -11,9 +11,7 @@ import org.semanticweb.owlapi.model.OWLNamedIndividual;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Created by Riccardo on 03/11/2016.
@@ -48,11 +46,6 @@ public class SemanticEvent extends HashMap<String, Object> implements Serializab
     @Getter
     @NonNull
     private String stream_uri;
-
-    @Getter
-    private Map<String, String> properties;
-    @Getter
-    private Set<String> triggeredFilterIRIs;
 
     public void setType(OWLClass c) {
         put(type, c);
@@ -91,6 +84,6 @@ public class SemanticEvent extends HashMap<String, Object> implements Serializab
     @Override
     public int hashCode() {
 
-        return Objects.hash(super.hashCode(), packetID, timeStamp, stream_uri, properties, triggeredFilterIRIs);
+        return Objects.hash(super.hashCode(), packetID, timeStamp, stream_uri);
     }
 }

@@ -56,10 +56,7 @@ public class CEP implements EventProcessor, EventStreamManager {
     @Override
     public void send(SemanticEvent se) {
         //TODO refactor the event definition
-        se.getTriggeredFilterIRIs().forEach(trigger -> {
-            String eventType = stripFilterName(trigger);
-            this.cep.sendEvent(se, eventType);
-        });
+        this.cep.sendEvent(se, stripFilterName(se.getStream_uri()));
     }
 
     @Override
