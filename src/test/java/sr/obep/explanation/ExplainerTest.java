@@ -1,14 +1,12 @@
-package sr.obep.abstraction;
+package sr.obep.explanation;
 
 import junit.framework.TestCase;
-import openllet.owlapi.OWL;
+import openllet.owlapi.OpenlletReasonerFactory;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
-import org.semanticweb.owlapi.model.parameters.OntologyCopy;
+import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import sr.obep.TestEventProcessor;
-import sr.obep.abstration.Abstracter;
-import sr.obep.abstration.AbstracterImpl;
 import sr.obep.data.events.ContentImpl;
 import sr.obep.data.events.SemanticEvent;
 import sr.obep.processors.EventProcessor;
@@ -17,13 +15,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-public class AbstracterTest extends TestCase {
+public class ExplainerTest extends TestCase {
 
-    /**
-     * Simple test that shows how abstracter works
-     **/
-    @Test
+
     public void test0() throws OWLOntologyCreationException {
 
         IRI base = IRI.create("http://example.org#");
@@ -39,29 +35,42 @@ public class AbstracterTest extends TestCase {
         o.add(factory.getOWLDeclarationAxiom(A));
         o.add(factory.getOWLDeclarationAxiom(B));
         o.add(factory.getOWLDeclarationAxiom(p));
-        o.add(factory.getOWLEquivalentClassesAxiom(A,
-                factory.getOWLObjectSomeValuesFrom(p, B)));
+        OWLEquivalentClassesAxiom equivalentClassesAxiom = factory.getOWLEquivalentClassesAxiom(A,
+                factory.getOWLObjectSomeValuesFrom(p, B));
+        o.add(equivalentClassesAxiom);
 
-        Abstracter abstracter = new AbstracterImpl(o);
-
-        // add the axioms
-        Set<OWLAxiom> axioms = new HashSet<>();
+        // ABOX axioms
+        Set<OWLAxiom> expected_explanation = new HashSet<>();
 
         OWLNamedIndividual b = factory.getOWLNamedIndividual(base + "b");
-        OWLNamedIndividual event = factory.getOWLNamedIndividual(base + "a");
-        axioms.add(factory.getOWLObjectPropertyAssertionAxiom(p, event, b));
+        OWLNamedIndividual a = factory.getOWLNamedIndividual(base + "a");
+        OWLObjectPropertyAssertionAxiom bpa = factory.getOWLObjectPropertyAssertionAxiom(p, a, b);
+        OWLClassAssertionAxiom baB = factory.getOWLClassAssertionAxiom(B, b);
 
-        axioms.add(factory.getOWLClassAssertionAxiom(B, b));
+        o.add(baB, bpa);
 
-        Set<OWLClass> types = abstracter.lift(o, event);
+        OWLReasoner reasoner = OpenlletReasonerFactory.getInstance().createReasoner(o);
 
-        Set<OWLClass> expected_types = new HashSet<>();
-        expected_types.add(A);
-        expected_types.add(OWL.Thing);
+        expected_explanation.add(baB);
+        expected_explanation.add(bpa);
+        expected_explanation.add(equivalentClassesAxiom);
 
-        assertEquals(types.size(), 2);
-        assertTrue(types.containsAll(expected_types));
+        Explainer explainer = new ExplainerImpl();
 
+        List<OWLClass> collect = reasoner.getTypes(a, true).entities().collect(Collectors.toList());
+        assertEquals(1, collect.size());
+
+        OWLClass explected_type = collect.get(0);
+
+        Set<Set<OWLAxiom>> actual_explanations = explainer.explain(o, a, explected_type);
+
+        assertEquals(1, actual_explanations.size());
+
+        Set<OWLAxiom> actual_explanation = actual_explanations.iterator().next();
+        actual_explanation.forEach(System.out::println);
+
+        assertEquals(expected_explanation.size(), actual_explanation.size());
+        assertTrue(actual_explanation.containsAll(expected_explanation));
     }
 
     @Test
@@ -80,8 +89,9 @@ public class AbstracterTest extends TestCase {
         o.add(factory.getOWLDeclarationAxiom(A));
         o.add(factory.getOWLDeclarationAxiom(B));
         o.add(factory.getOWLDeclarationAxiom(p));
-        o.add(factory.getOWLEquivalentClassesAxiom(A,
-                factory.getOWLObjectSomeValuesFrom(p, B)));
+        OWLEquivalentClassesAxiom owlEquivalentClassesAxiom = factory.getOWLEquivalentClassesAxiom(A,
+                factory.getOWLObjectSomeValuesFrom(p, B));
+        o.add(owlEquivalentClassesAxiom);
 
         //Input Semantic Event
 
@@ -92,36 +102,36 @@ public class AbstracterTest extends TestCase {
         OWLNamedIndividual event = factory.getOWLNamedIndividual(base + "a");
         axioms.add(factory.getOWLObjectPropertyAssertionAxiom(p, event, b));
 
+        Set<OWLAxiom> expected_explanation = new HashSet<>();
+
+        OWLObjectPropertyAssertionAxiom bpa = factory.getOWLObjectPropertyAssertionAxiom(p, event, b);
+        OWLClassAssertionAxiom baB = factory.getOWLClassAssertionAxiom(B, b);
+
         axioms.add(factory.getOWLClassAssertionAxiom(B, b));
 
+        o.add(axioms);
+
         SemanticEvent message = new SemanticEvent("http://example.org#a");
+        message.setType(A);
         message.setStream_uri("test1");
         message.setTimeStamp(System.currentTimeMillis());
-        message.setContent(new ContentImpl(axioms));
-
+        message.setContent(new ContentImpl(o));
 
         //Expected Output
-        //TBox
-        OWLOntology copy = OWLManager.createOWLOntologyManager().copyOntology(o, OntologyCopy.SHALLOW);
-        //ABox
-        copy.add(axioms);
+        expected_explanation.add(baB);
+        expected_explanation.add(bpa);
+        expected_explanation.add(owlEquivalentClassesAxiom);
 
-        SemanticEvent thing = new SemanticEvent("http://example.org#a");
-        thing.setContent(new ContentImpl(copy));
-        thing.setStream_uri("test1");
-        thing.setType(OWL.Thing);
         SemanticEvent eventA = new SemanticEvent("http://example.org#a");
-        eventA.setContent(new ContentImpl(copy));
+        eventA.setContent(new ContentImpl(expected_explanation));
         eventA.setStream_uri("test1");
         eventA.setType(A);
 
 
         final Set<SemanticEvent> expected_events = new HashSet<>();
         expected_events.add(eventA);
-        expected_events.add(thing);
 
         final List<SemanticEvent> actual_events = new ArrayList<>();
-
 
         TestEventProcessor tester = new TestEventProcessor() {
 
@@ -136,22 +146,22 @@ public class AbstracterTest extends TestCase {
             }
         };
 
-        Abstracter abstracter = new AbstracterImpl(o);
-        abstracter.pipe(tester);
+        Explainer explainer = new ExplainerImpl();
+        explainer.pipe(tester);
 
-        abstracter.send(message);
+        explainer.send(message);
 
-        assertEquals(expected_events.size(), actual_events.size());
-        actual_events.forEach(semanticEvent -> {
-            assertTrue(semanticEvent.containsKey("timestamp.abstracter"));
-            assertTrue(semanticEvent.containsKey("event_type"));
-            assertTrue(semanticEvent.get("event_type") != null);
-        });
+        assertEquals(1, actual_events.size());
 
-        assertEquals(OWL.Thing,
-                actual_events.get(0).getType());
-        assertEquals(A,
-                actual_events.get(1).getType());
+        SemanticEvent semanticEvent = actual_events.get(0);
+
+        assertTrue(semanticEvent.containsKey("timestamp.explainer"));
+        assertTrue(semanticEvent.containsKey("event_type"));
+        assertTrue(semanticEvent.get("event_type") != null);
+        assertTrue(expected_explanation.containsAll(semanticEvent.getContent().asOWLAxioms()));
+        assertEquals(A, semanticEvent.getType());
 
     }
+
+
 }
