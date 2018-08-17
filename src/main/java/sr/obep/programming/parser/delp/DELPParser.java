@@ -1,9 +1,11 @@
 package sr.obep.programming.parser.delp;
 
 import org.apache.jena.graph.Node;
+import org.apache.jena.sparql.syntax.ElementFilter;
 import org.parboiled.Rule;
+import sr.obep.programming.parser.delp.data.*;
+import sr.obep.programming.parser.sparql.Prefix;
 import sr.obep.programming.parser.sparql.SPARQLParser;
-import sr.obep.programming.parser.OBEPQueryImpl;
 
 /**
  * Created by Riccardo on 09/08/16.
@@ -12,16 +14,35 @@ public class DELPParser extends SPARQLParser {
 
     @Override
     public Rule Query() {
-        return Sequence(push(new OBEPQueryImpl()), WS(), Prologue(),
+        return Sequence(push(new OBEPParserOutput()), WS(), Prologue(),
                 OneOrMore(CreateEventClause()), EOI);
     }
+
+    public Rule Prologue() {
+        return Sequence(Optional(BaseDecl()), ZeroOrMore(PrefixDecl()));
+    }
+
+    public Rule BaseDecl() {
+        return Sequence(BASE(), IRI_REF(),
+                pushQuery(((OBEPParserOutput) pop(0)).setQBaseURI(trimMatch().replace(">", "").replace("<", ""))), WS());
+    }
+
+    public Rule PrefixDecl() {
+        return Sequence(PrefixBuild(), pushQuery(((OBEPParserOutput) pop(1)).setPrefix((Prefix) pop())), WS());
+    }
+
+    public Rule PrefixBuild() {
+        return Sequence(PREFIX(), PNAME_NS(), push(new Prefix(trimMatch())), IRI_REF(),
+                push(((Prefix) pop()).setURI(URIMatch())), WS());
+    }
+
 
     public Rule CreateEventClause() {
         return Sequence(NAMED(), EVENT(), IriRef(),
                 FirstOf(
-                        Sequence(OPEN_CURLY_BRACE(), push(new EventCalculusDecl((Node) pop())), EventCalculusDeclaration(), CLOSE_CURLY_BRACE()),
-                        Sequence(push(new DLEventDecl((Node) pop())), DLEventDeclaration(), setDLRule()))
-                , pushQuery(((OBEPQueryImpl) popQuery(-1)).addEventDecl((EventDecl) pop())), Optional(DOT()));
+                        Sequence(OPEN_CURLY_BRACE(), push(new CompositeEventDeclaration((Node) pop())), EventCalculusDeclaration(), CLOSE_CURLY_BRACE()),
+                        Sequence(push(new LogicalEventDeclaration((Node) pop())), DLEventDeclaration(), setDLRule()))
+                , pushQuery(((OBEPParserOutput) popQuery(-1)).addEventDecl((ComplexEventDeclaration) pop())), Optional(DOT()));
     }
 
     public Rule DLEventDeclaration() {
@@ -49,17 +70,20 @@ public class DELPParser extends SPARQLParser {
     }
 
     public Rule EventFilterDecl() {
-        return Sequence(EVENT(), VarOrIRIref(), OPEN_CURLY_BRACE(), EventClause(), addEventFilter((IFDecl) pop(), (Node) pop()), CLOSE_CURLY_BRACE(), WS());
+        return FirstOf(Sequence(Filter(), addFilter((ElementFilter) pop()), WS()),
+                Sequence(EVENT(), VarOrIRIref(), OPEN_CURLY_BRACE(), EventClause(), addEventFilter((NormalFormDeclaration) pop(), (Node) pop()), CLOSE_CURLY_BRACE(), WS())
+        );
     }
 
+
     public Rule EventClause() {
-        return Sequence(TriplesBlock(), push(new IFDecl(popElement())));
+        return Sequence(TriplesBlock(), push(new NormalFormDeclaration(popElement())));
     }
 
 
     public Rule PatternExpression() {
         return Sequence(FollowedByExpression(), Optional(Sequence(WITHIN(), LPAR(), TimeConstrain(),
-                push(new PatternCollector(match(), (PatternCollector) pop())), RPAR())));
+                push(new PatternDeclaration(match(), (PatternDeclaration) pop())), RPAR())));
     }
 
     public Rule FollowedByExpression() {
@@ -77,57 +101,62 @@ public class DELPParser extends SPARQLParser {
     }
 
     public Rule QualifyExpression() {
-        return FirstOf(Sequence(FirstOf(EVERY(), NOT()), push(new PatternCollector(trimMatch())), GuardPostFix(),
+        return FirstOf(Sequence(FirstOf(EVERY(), NOT()), push(new PatternDeclaration(trimMatch())), GuardPostFix(),
                 addExpression()), GuardPostFix());
     }
 
     public Rule GuardPostFix() {
         return FirstOf(
-                Sequence(LPAR(), PatternExpression(), RPAR(), push(new PatternCollector((PatternCollector) pop()))),
-                Sequence(VarOrIRIref(), push(((OBEPQueryImpl) getQuery(-1)).getEventDecl((Node) peek())),
-                        push(new PatternCollector((EventDecl) pop(), (Node) pop()))));
+                Sequence(LPAR(), PatternExpression(), RPAR(), push(new PatternDeclaration((PatternDeclaration) pop()))),
+                Sequence(VarOrIRIref(), push(((OBEPParserOutput) getQuery(-1)).getEventDecl((Node) peek())),
+                        push(new PatternDeclaration((ComplexEventDeclaration) pop(), (Node) pop()))));
 
     }
-
 
     //Utility methods
 
     @Override
     public boolean startSubQuery(int i) {
-        return push(new OBEPQueryImpl(getQuery(i).getQ().getPrologue()));
+        return push(new OBEPParserOutput(getQuery(i).getQ().getPrologue()));
     }
 
     // MQL
-    public boolean addEventFilter(IFDecl pop, Node node) {
-        EventCalculusDecl peek = (EventCalculusDecl) peek();
+    public boolean addEventFilter(NormalFormDeclaration pop, Node node) {
+        CompositeEventDeclaration peek = (CompositeEventDeclaration) peek();
         pop.setVar(node);
         peek.addEventFilter(pop);
 
         return true;
     }
 
+    public boolean addFilter(ElementFilter pop) {
+        CompositeEventDeclaration peek = (CompositeEventDeclaration) peek();
+        peek.addFilter(pop);
+        return true;
+    }
+
     public boolean addPatternExpression() {
-        ((EventCalculusDecl) peek(1)).setExpr((PatternCollector) pop());
+        ((CompositeEventDeclaration) peek(1)).setExpr((PatternDeclaration) pop());
         return true;
     }
 
     public boolean setDLRule() {
-        ((DLEventDecl) peek()).setBody(match());
+        ((LogicalEventDeclaration) peek()).setDlbody(match());
         return true;
     }
 
     public boolean addExpression() {
-        PatternCollector inner = (PatternCollector) pop();
-        PatternCollector outer = (PatternCollector) pop();
+        PatternDeclaration inner = (PatternDeclaration) pop();
+        PatternDeclaration outer = (PatternDeclaration) pop();
         outer.addPattern(inner);
         return push(outer);
     }
 
     public boolean enclose(String operator) {
-        PatternCollector inner = (PatternCollector) pop();
+        PatternDeclaration inner = (PatternDeclaration) pop();
 
         if (inner.isBracketed() || inner.getOperator() == null || !operator.equals(inner.getOperator())) {
-            PatternCollector outer = new PatternCollector(operator);
+            PatternDeclaration outer = new PatternDeclaration(operator);
             outer.setOperator(operator);
             outer.addPattern(inner);
             return push(outer);
@@ -136,13 +165,44 @@ public class DELPParser extends SPARQLParser {
 
     }
 
-    //MQL Syntax Extensions
+    //OBEP Syntax Extensions
 
-    // MQL
+    //INPUT
+
+    public Rule STREAM() {
+        return StringIgnoreCaseWS("STREAM");
+    }
+
+    public Rule RDF() {
+        return StringIgnoreCaseWS("RDF");
+    }
+
+    //OUTPUT
+
+    public Rule RETURN() {
+        return StringIgnoreCaseWS("RETURN");
+    }
+
+
+    // DSMS
     public Rule EVENT() {
         return StringIgnoreCaseWS("EVENT");
     }
 
+    public Rule AGGREGATE() {
+        return StringIgnoreCaseWS("AGGREGATE");
+    }
+
+    public Rule PARTITION() {
+        return StringIgnoreCaseWS("PARTITION");
+    }
+
+    public Rule WINDOW() {
+        return StringIgnoreCaseWS("WINDOW");
+    }
+
+
+    //EPL
     public Rule CREATE() {
         return StringIgnoreCaseWS("CREATE");
     }
@@ -179,4 +239,17 @@ public class DELPParser extends SPARQLParser {
     public Rule TimeConstrain() {
         return Sequence(INTEGER(), TIME_UNIT());
     }
+
+    //DL
+
+    public Rule SUBCLASSOF() {
+        return StringIgnoreCaseWS("SubClassOf");
+    }
+
+    public Rule SOME() {
+        return StringIgnoreCaseWS("some");
+    }
+
+
+
 }

@@ -7,11 +7,11 @@ import org.parboiled.Parboiled;
 import org.parboiled.errors.ParseError;
 import org.parboiled.parserunners.ReportingParseRunner;
 import org.parboiled.support.ParsingResult;
+import sr.obep.programming.parser.delp.data.CompositeEventDeclaration;
 import sr.obep.programming.parser.delp.DELPParser;
-import sr.obep.programming.parser.delp.EventCalculusDecl;
-import sr.obep.programming.parser.delp.EventDecl;
+import sr.obep.programming.parser.delp.data.ComplexEventDeclaration;
 import sr.obep.programming.Program;
-import sr.obep.programming.parser.OBEPQueryImpl;
+import sr.obep.programming.parser.delp.OBEPParserOutput;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,9 +35,9 @@ public class OBEPEngineTest extends TestCase {
             }
         }
 
-        OBEPQueryImpl q = (OBEPQueryImpl) result.resultValue;
-        for (EventDecl event : q.getEventCalculusDecls()) {
-            EventCalculusDecl ecd = (EventCalculusDecl) event;
+        OBEPParserOutput q = (OBEPParserOutput) result.resultValue;
+        for (ComplexEventDeclaration event : q.getCompositeEvents()) {
+            CompositeEventDeclaration ecd = (CompositeEventDeclaration) event;
             System.out.println(ecd);
         }
     }

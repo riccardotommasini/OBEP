@@ -1,15 +1,16 @@
 package sr.obep.programming.parser.sparql;
 
+import lombok.AllArgsConstructor;
 import lombok.ToString;
 
 /**
  * Created by Riccardo on 06/08/16.
  */
+@AllArgsConstructor
 @ToString
 public class Prefix {
 
     private String prefix, uri;
-
 
     public Prefix(String match) {
         this.prefix = match.replace(":", "");

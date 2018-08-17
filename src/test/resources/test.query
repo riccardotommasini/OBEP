@@ -9,9 +9,11 @@ NAMED EVENT :TemperatureFilter subClassOf
 	( ssniot:hasContext some ( ssniot:observedProperty some (ssn:Temperature) ) )
 
 NAMED EVENT :A {
-     MATCH every :SmokeFilter -> :TemperatureFilter WITHIN (5m)
+     MATCH every (:SmokeFilter -> :TemperatureFilter) WITHIN (5m)
      IF {
         EVENT :SmokeFilter { ?loc dul:hasDataValue ?value .  }
         EVENT :TemperatureFilter { ?loc1 dul:hasDataValue ?value .  }
+        FILTER(?value >30)
+        FILTER(?value2 >30)
      }
 }

@@ -9,10 +9,11 @@ import org.parboiled.parserunners.ReportingParseRunner;
 import org.parboiled.support.ParsingResult;
 import sr.obep.data.events.LogicalEvent;
 import sr.obep.programming.parser.delp.DELPParser;
-import sr.obep.programming.parser.delp.DLEventDecl;
-import sr.obep.programming.parser.delp.EventCalculusDecl;
-import sr.obep.programming.parser.delp.EventDecl;
-import sr.obep.programming.parser.OBEPQueryImpl;
+import sr.obep.programming.parser.delp.data.LogicalEventDeclaration;
+import sr.obep.programming.parser.delp.data.CompositeEventDeclaration;
+import sr.obep.programming.parser.delp.data.ComplexEventDeclaration;
+import sr.obep.programming.parser.delp.OBEPParserOutput;
+import sr.obep.programming.parser.sparql.Prefix;
 
 import java.util.Map;
 import java.util.Set;
@@ -25,9 +26,13 @@ public class ProgramManagerImpl implements ProgramManager {
 
         ProgramImpl res = new ProgramImpl();
 
+
+        Set<Prefix> prefixes = res.getPrefixes();
+
+
         DELPParser parser = Parboiled.createParser(DELPParser.class);
 
-        ParsingResult<OBEPQueryImpl> result = new ReportingParseRunner(parser.Query()).run(program);
+        ParsingResult<OBEPParserOutput> result = new ReportingParseRunner(parser.Query()).run(program);
 
         if (result.hasErrors()) {
             for (ParseError arg : result.parseErrors) {
@@ -35,34 +40,36 @@ public class ProgramManagerImpl implements ProgramManager {
             }
         }
 
-        OBEPQueryImpl q = result.resultValue;
+        OBEPParserOutput q = result.resultValue;
+
+        q.getPrefixes().forEach(prefixes::add);
 
         if (q.getEventDeclarations() != null) {
-            Map<Node, EventDecl> eventDeclarations = q.getEventDeclarations();
-            Set<Map.Entry<Node, EventDecl>> entries = eventDeclarations.entrySet();
-            for (Map.Entry<Node, EventDecl> entry : entries) {
-                EventDecl value = entry.getValue();
+            Map<Node, ComplexEventDeclaration> eventDeclarations = q.getEventDeclarations();
+            Set<Map.Entry<Node, ComplexEventDeclaration>> entries = eventDeclarations.entrySet();
+            for (Map.Entry<Node, ComplexEventDeclaration> entry : entries) {
+                ComplexEventDeclaration value = entry.getValue();
 
-                if (value instanceof EventCalculusDecl) {
+                if (value instanceof CompositeEventDeclaration) {
 
-                    EventCalculusDecl e = (EventCalculusDecl) value;
+                    CompositeEventDeclaration e = (CompositeEventDeclaration) value;
                     System.out.println(e.toString());
 
                     Set<Var> joinVariables = e.getJoinVariables();
 
                     if (q.getEventDeclarations() != null) {
-                        for (Map.Entry<Node, EventDecl> en : entries) {
-                            EventDecl v = en.getValue();
+                        for (Map.Entry<Node, ComplexEventDeclaration> en : entries) {
+                            ComplexEventDeclaration v = en.getValue();
 
-                            if (v instanceof DLEventDecl) {
-                                final DLEventDecl dl = (DLEventDecl) v;
+                            if (v instanceof LogicalEventDeclaration) {
+                                final LogicalEventDeclaration dl = (LogicalEventDeclaration) v;
 
                                 String s = dl.toEPLSchema(joinVariables);
                                 System.out.println(s);
                                 res.getLogicalEvents().add(new LogicalEvent() {
                                     @Override
                                     public String getHead() {
-                                        return dl.getHead().toString();
+                                        return dl.getHead_node().toString();
                                     }
 
                                     @Override

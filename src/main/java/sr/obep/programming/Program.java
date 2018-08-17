@@ -21,4 +21,6 @@ public interface Program {
 
     Set<CompositeEvent> getCompositeEvents();
 
+    Set<String> getOutputStreams();
+
 }
