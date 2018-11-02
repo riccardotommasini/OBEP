@@ -2,12 +2,12 @@ package sr.obep.pipeline.normalization;
 
 import lombok.extern.slf4j.Slf4j;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLOntology;
 import sr.obep.data.events.Content;
 import sr.obep.data.events.RawEvent;
 import sr.obep.pipeline.processors.EventProcessor;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,13 +20,15 @@ public class SPARQLNormalizer implements Normalizer {
     private EventProcessor next;
     private final Map<OWLClass, NormalForm> nfs;
     private final String extractor_time = "timestamp_normalizer";
+    private final OWLOntology tbox;
+    private final String context;
 
-    public SPARQLNormalizer(Map<OWLClass, NormalForm> queries) {
-        this.nfs = queries;
-    }
 
-    public SPARQLNormalizer() {
-        this(new HashMap<>());
+    public SPARQLNormalizer(OWLOntology ebox, Map<OWLClass, NormalForm> active_normal_forms, String context) {
+        this.nfs = active_normal_forms;
+        this.tbox = ebox;
+        this.context = context;
+        this.nfs.values().forEach(v -> v.tbox(ebox));
     }
 
     @Override
@@ -50,7 +52,9 @@ public class SPARQLNormalizer implements Normalizer {
             RawEvent copy = e.copy();
             copy.put(extractor_time, System.currentTimeMillis());
             resultItem.forEach(copy::put);
+            copy.setContext(context);
             next.send(copy);
+
         });
     }
 

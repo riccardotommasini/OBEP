@@ -177,6 +177,14 @@ public class Lexer extends ParserUtils {
 
     }
 
+    public Rule VOCAB() {
+        return StringIgnoreCaseWS("VOCAB");
+    }
+
+    public Rule TBOX() {
+        return StringIgnoreCaseWS("TBOX");
+    }
+
     public Rule FROM() {
         return StringIgnoreCaseWS("FROM");
     }
@@ -239,6 +247,10 @@ public class Lexer extends ParserUtils {
 
     public Rule AS() {
         return StringIgnoreCaseWS("AS");
+    }
+
+    public Rule ALL() {
+        return StringIgnoreCaseWS("ALL");
     }
 
     public Rule STR() {

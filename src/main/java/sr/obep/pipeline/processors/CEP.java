@@ -31,6 +31,8 @@ public class CEP implements EventProcessor, EventStreamManager {
         configuration.getEngineDefaults().getLogging().setEnableExecutionDebug(true);
         configuration.getEngineDefaults().getLogging().setEnableTimerDebug(true);
 
+        configuration.addPlugInSingleRowFunction("merge2", "sr.obep.data.content.ContentUtils", "merge2");
+
         this.epService = EPServiceProviderManager.getDefaultProvider(configuration);
         this.cep = this.epService.getEPRuntime();
         this.cepAdm = this.epService.getEPAdministrator();
@@ -56,8 +58,9 @@ public class CEP implements EventProcessor, EventStreamManager {
     @Override
     public void send(RawEvent se) {
         //TODO refactor the event definition
-        System.out.println("Sending an ["+stripFilterName(se.getType().toStringID())+"]");
-        this.cep.sendEvent(se, stripFilterName(se.getType().toStringID()));
+        String stream = se.getContext() + "_" + stripFilterName(se.getType().toStringID());
+        System.out.println("Sending an [" + stream + "]");
+        this.cep.sendEvent(se, stripFilterName(stream));
     }
 
     @Override
@@ -74,6 +77,7 @@ public class CEP implements EventProcessor, EventStreamManager {
 
     @Override
     public EPStatement register_event_pattern_stream(String pattern) {
+        log.info(pattern);
         return this.cepAdm.createEPL(pattern);
     }
 }

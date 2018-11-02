@@ -4,10 +4,10 @@ import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import sr.obep.TestEventProcessor;
-import sr.obep.pipeline.abstration.Abstracter;
-import sr.obep.pipeline.abstration.AbstracterImpl;
 import sr.obep.data.content.ContentOntology;
 import sr.obep.data.events.RawEvent;
+import sr.obep.pipeline.abstration.Abstracter;
+import sr.obep.pipeline.abstration.AbstracterImpl;
 import sr.obep.pipeline.explanation.Explainer;
 import sr.obep.pipeline.explanation.ExplainerImpl;
 import sr.obep.pipeline.normalization.NormalForm;
@@ -16,10 +16,7 @@ import sr.obep.pipeline.normalization.SPARQLNormalForm;
 import sr.obep.pipeline.normalization.SPARQLNormalizer;
 import sr.obep.pipeline.processors.EventProcessor;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class CompletePipelineTest extends TestCase {
 
@@ -57,26 +54,30 @@ public class CompletePipelineTest extends TestCase {
 
         Abstracter abstracter = new AbstracterImpl(o);
 
-        Explainer explainer = new ExplainerImpl();
+        Explainer explainer = new ExplainerImpl(o);
 
-        Normalizer normalizer = new SPARQLNormalizer();
-        NormalForm normalForm = new SPARQLNormalForm("SELECT * WHERE {?s <http://example.org#p> ?o }", A);
+        Normalizer normalizer = new SPARQLNormalizer(o, new HashMap<>(), "");
+        NormalForm normalForm = new SPARQLNormalForm("", " SELECT * WHERE {?s<http://example.org#p> ?o }", A);
         normalizer.addNormalForm(normalForm);
 
         List<RawEvent> actual = new ArrayList<>();
 
-        abstracter.pipe(explainer).pipe(normalizer).pipe(new TestEventProcessor() {
+        abstracter.pipe(explainer).
 
-            @Override
-            public void send(RawEvent e) {
-                actual.add(e);
-            }
+                pipe(normalizer).
 
-            @Override
-            public EventProcessor pipe(EventProcessor p) {
-                return null;
-            }
-        });
+                pipe(new TestEventProcessor() {
+
+                    @Override
+                    public void send(RawEvent e) {
+                        actual.add(e);
+                    }
+
+                    @Override
+                    public EventProcessor pipe(EventProcessor p) {
+                        return null;
+                    }
+                });
 
         RawEvent message = new RawEvent("http://example.org#a");
         message.setStream_uri("test1");
@@ -95,17 +96,30 @@ public class CompletePipelineTest extends TestCase {
         RawEvent actual_event = actual.get(0);
 
         assertEquals(A, actual_event.getType());
-        assertEquals(3, actual_event.getContent().asOWLAxioms().size());
+
+        assertEquals(3, actual_event.getContent().
+
+                asOWLAxioms().
+
+                size());
 
         assertTrue(actual_event.containsKey("timestamp_abstracter"));
+
         assertTrue(actual_event.containsKey("timestamp_explainer"));
+
         assertTrue(actual_event.containsKey("timestamp_normalizer"));
 
         assertTrue(actual_event.containsKey("s"));
+
         assertTrue(actual_event.containsKey("o"));
 
-        assertEquals(actual_event.get("s"), a.toStringID());
-        assertEquals(actual_event.get("o"), b.toStringID());
+        assertEquals(actual_event.get("s"), a.
+
+                toStringID());
+
+        assertEquals(actual_event.get("o"), b.
+
+                toStringID());
 
 
     }

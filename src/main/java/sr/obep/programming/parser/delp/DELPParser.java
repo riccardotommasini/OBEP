@@ -1,6 +1,7 @@
 package sr.obep.programming.parser.delp;
 
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Node_URI;
 import org.apache.jena.sparql.syntax.ElementFilter;
 import org.parboiled.Rule;
 import sr.obep.programming.parser.delp.data.*;
@@ -15,7 +16,53 @@ public class DELPParser extends SPARQLParser {
     @Override
     public Rule Query() {
         return Sequence(push(new OBEPParserOutput()), WS(), Prologue(),
-                OneOrMore(CreateEventClause()), EOI);
+                VocabClause(), DataClause(),
+                OneOrMore(CreateEventClause()), OutputClause(), EOI);
+    }
+
+    public Rule OutputClause() {
+        return Sequence(RETURN(), push(new ResultClause()),
+                FirstOf(
+                        Sequence(ALL(), push(((ResultClause) pop()).setAll())),
+                        Sequence(NAMED(), push(((ResultClause) pop()).setNamed())),
+                        SelectedStreams()),
+                AS(),
+                FirstOf(Sequence(RDF(), push(((ResultClause) pop()).setRDF())),
+                        Sequence(EVENT(), push(((ResultClause) pop()).setEvent()))),
+                STREAM(),
+                push(((OBEPParserOutput) pop(1)).addResultClause((ResultClause) pop())));
+    }
+
+    public Rule SelectedStreams() {
+        return OneOrMore(IriRef(), push(((ResultClause) pop(1)).addReturnEvent((Node)pop())));
+    }
+
+    public Rule DataClause() {
+        return FirstOf(Sequence(OneOrMore(DataStreamClause()), ZeroOrMore(DatasetClause())), Sequence(ZeroOrMore(DatasetClause()), OneOrMore(DataStreamClause())));
+    }
+
+    public Rule VocabClause() {
+        return Sequence(FirstOf(VOCAB(), TBOX()), SourceSelector(), pushQuery(((OBEPParserOutput) pop(1)).addVocabURI((Node_URI) pop())));
+    }
+
+    public Rule DatasetClause() {
+        return Sequence(FROM(), GRAPH(), DefaultGraphClause());
+    }
+
+    public Rule DataStreamClause() {
+        return Sequence(FROM(), STREAM(), DefaultStreamClause());
+    }
+
+    public Rule DefaultStreamClause() {
+        return Sequence(SourceSelector(), pushQuery(((OBEPParserOutput) pop(1)).addStreamURI((Node_URI) pop())));
+    }
+
+    public Rule DefaultGraphClause() {
+        return Sequence(SourceSelector(), pushQuery(((OBEPParserOutput) pop(1)).addStaticGraphURI((Node_URI) pop())));
+    }
+
+    public Rule NamedGraphClause() {
+        return Sequence(NAMED(), SourceSelector(), pushQuery(((OBEPParserOutput) pop(1)).addNamedGraphURI((Node_URI) pop())));
     }
 
     public Rule Prologue() {
@@ -36,16 +83,16 @@ public class DELPParser extends SPARQLParser {
                 push(((Prefix) pop()).setURI(URIMatch())), WS());
     }
 
-
     public Rule CreateEventClause() {
-        return Sequence(NAMED(), EVENT(), IriRef(),
+        return Sequence(Optional(NAMED()), EVENT(), IriRef(),
                 FirstOf(
                         Sequence(OPEN_CURLY_BRACE(), push(new CompositeEventDeclaration((Node) pop())), EventCalculusDeclaration(), CLOSE_CURLY_BRACE()),
-                        Sequence(push(new LogicalEventDeclaration((Node) pop())), DLEventDeclaration(), setDLRule()))
+                        Sequence(AS(), DLEventDeclaration(), push(new LogicalEventDeclaration(match(), (Node) pop()))))
                 , pushQuery(((OBEPParserOutput) popQuery(-1)).addEventDecl((ComplexEventDeclaration) pop())), Optional(DOT()));
     }
 
     public Rule DLEventDeclaration() {
+        //TODO
         return ZeroOrMore(Sequence(TestNot(FirstOf(EVENT(), NAMED())), ANY), WS());
     }
 
@@ -124,6 +171,7 @@ public class DELPParser extends SPARQLParser {
     public boolean addEventFilter(NormalFormDeclaration pop, Node node) {
         CompositeEventDeclaration peek = (CompositeEventDeclaration) peek();
         pop.setVar(node);
+        pop.setContext(peek.getUri());
         peek.addEventFilter(pop);
 
         return true;
@@ -249,7 +297,6 @@ public class DELPParser extends SPARQLParser {
     public Rule SOME() {
         return StringIgnoreCaseWS("some");
     }
-
 
 
 }

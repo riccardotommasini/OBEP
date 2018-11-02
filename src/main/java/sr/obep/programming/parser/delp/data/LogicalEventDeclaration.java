@@ -4,10 +4,8 @@ import com.espertech.esper.client.soda.CreateSchemaClause;
 import com.espertech.esper.client.soda.SchemaColumnDesc;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.ToString;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
-import sr.obep.data.events.LogicalEvent;
 
 import java.io.StringWriter;
 import java.util.*;
@@ -19,21 +17,21 @@ import java.util.*;
  * is a SPARQL-Like constraint for the event instances.
  */
 @EqualsAndHashCode
-@ToString
 @Data
-public class LogicalEventDeclaration extends ComplexEventDeclaration implements LogicalEvent {
+public class LogicalEventDeclaration extends ComplexEventDeclaration {
 
     private String dlbody;
     private int occurrence = -1;
 
-    public LogicalEventDeclaration(Node head) {
+    public LogicalEventDeclaration(String s, Node head) {
         super(head);
+        this.dlbody = s;
     }
 
     public String toEPLSchema(Set<Var> vars) {
         CreateSchemaClause schema = new CreateSchemaClause();
-        schema.setSchemaName(getHead_node().getURI().replace(getHead_node().getNameSpace(), "")); //TODO
-        schema.setInherits(new HashSet<String>(Arrays.asList(new String[]{"TEvent"})));
+        schema.setSchemaName(getUri().replace(getNamespace(), "")); //TODO
+        schema.setInherits(new HashSet<>(Arrays.asList(new String[]{"TEvent"})));
         List<SchemaColumnDesc> columns = new ArrayList<SchemaColumnDesc>();
         for (Var var : vars) {
             SchemaColumnDesc scd = new SchemaColumnDesc();
@@ -50,18 +48,8 @@ public class LogicalEventDeclaration extends ComplexEventDeclaration implements 
         return writer.toString();
     }
 
-    public String toEPLSchema() {
-        return toEPLSchema(new HashSet<Var>());
-    }
-
-
     @Override
-    public String getHead() {
-        return head_node.toString();
-    }
-
-    @Override
-    public String getBody() {
-        return dlbody;
+    public String toString() {
+        return ("Class: " + getHead() + " \n\t EquivalentTo: " + getDlbody().replace(":", "")).trim();
     }
 }

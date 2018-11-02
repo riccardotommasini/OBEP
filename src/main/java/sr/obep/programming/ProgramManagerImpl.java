@@ -24,7 +24,7 @@ public class ProgramManagerImpl implements ProgramManager {
     @Override
     public Program parse(String program) {
 
-        ProgramImpl res = new ProgramImpl();
+        ProgramImpl res = null;
 
 
         Set<Prefix> prefixes = res.getPrefixes();
@@ -45,9 +45,9 @@ public class ProgramManagerImpl implements ProgramManager {
         q.getPrefixes().forEach(prefixes::add);
 
         if (q.getEventDeclarations() != null) {
-            Map<Node, ComplexEventDeclaration> eventDeclarations = q.getEventDeclarations();
-            Set<Map.Entry<Node, ComplexEventDeclaration>> entries = eventDeclarations.entrySet();
-            for (Map.Entry<Node, ComplexEventDeclaration> entry : entries) {
+            Map<String, ComplexEventDeclaration> eventDeclarations = q.getEventDeclarations();
+            Set<Map.Entry<String, ComplexEventDeclaration>> entries = eventDeclarations.entrySet();
+            for (Map.Entry<String, ComplexEventDeclaration> entry : entries) {
                 ComplexEventDeclaration value = entry.getValue();
 
                 if (value instanceof CompositeEventDeclaration) {
@@ -58,7 +58,7 @@ public class ProgramManagerImpl implements ProgramManager {
                     Set<Var> joinVariables = e.getJoinVariables();
 
                     if (q.getEventDeclarations() != null) {
-                        for (Map.Entry<Node, ComplexEventDeclaration> en : entries) {
+                        for (Map.Entry<String, ComplexEventDeclaration> en : entries) {
                             ComplexEventDeclaration v = en.getValue();
 
                             if (v instanceof LogicalEventDeclaration) {
@@ -69,12 +69,12 @@ public class ProgramManagerImpl implements ProgramManager {
                                 res.getLogicalEvents().add(new LogicalEvent() {
                                     @Override
                                     public String getHead() {
-                                        return dl.getHead_node().toString();
+                                        return dl.getUri();
                                     }
 
                                     @Override
                                     public String getBody() {
-                                        return dl.getBody();
+                                        return dl.getDlbody();
                                     }
                                 });
 
@@ -83,8 +83,7 @@ public class ProgramManagerImpl implements ProgramManager {
                         }
                     }
 
-                    EPStatementObjectModel epStatementObjectModel = e.toEpl();
-                    System.out.println(epStatementObjectModel.toEPL());
+                    System.out.println(e.toEpl().toString());
                 }
 
             }

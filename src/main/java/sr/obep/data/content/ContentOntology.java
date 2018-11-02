@@ -6,6 +6,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.model.parameters.Imports;
 import sr.obep.data.events.Content;
 
 import java.io.ByteArrayInputStream;
@@ -30,7 +31,12 @@ public class ContentOntology implements Content {
 
     @Override
     public OWLOntology asOWLOntology() {
-        return ontology;
+        try {
+            return OWLManager.createOWLOntologyManager().createOntology(ontology.aboxAxioms(Imports.EXCLUDED));
+        } catch (OWLOntologyCreationException e) {
+            e.printStackTrace();
+            throw new RuntimeException();
+        }
     }
 
     @Override

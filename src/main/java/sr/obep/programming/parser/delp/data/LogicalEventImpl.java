@@ -1,16 +1,12 @@
-package sr.obep;
+package sr.obep.programming.parser.delp.data;
 
+import lombok.AllArgsConstructor;
 import sr.obep.data.events.LogicalEvent;
 
+@AllArgsConstructor
 public class LogicalEventImpl implements LogicalEvent {
 
     private String head, body;
-
-    public LogicalEventImpl(String e) {
-        String[] split = e.split(":=");
-        head = split[0];
-        body = split[1];
-    }
 
     @Override
     public String getHead() {

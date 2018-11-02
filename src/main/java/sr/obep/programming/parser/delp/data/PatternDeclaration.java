@@ -34,7 +34,6 @@ public class PatternDeclaration {
     private String within;
     private List<NormalFormDeclaration> global_filters;
 
-
     public PatternDeclaration(PatternDeclaration pop) {
         addPattern(pop);
         bracketed = true;
@@ -131,17 +130,16 @@ public class PatternDeclaration {
         return null;
     }
 
-    private PatternExpr createFilter(int currentIndex, List<NormalFormDeclaration> filters) {
+    private PatternExpr createFilter(String ctx, int currentIndex, List<NormalFormDeclaration> filters) {
         Conjunction andExpr = Expressions.and();
+        String varName = getVarName();
         for (int j = 0; j < filters.size(); j++) {
-            if (j == currentIndex) {
+            if (j >= currentIndex) {
                 continue;
             }
 
-
-            Set<Var> vars = new HashSet<Var>(eventFilter.getVars());
-            NormalFormDeclaration id = filters.get(j);
-            id.build();
+            Set<Var> vars = new HashSet<>(eventFilter.getVars());
+            NormalFormDeclaration id = filters.get(j).build();
             vars.retainAll(id.getVars());
 
             for (Var v : vars) {
@@ -152,65 +150,66 @@ public class PatternDeclaration {
         }
 
         if (andExpr.getChildren() == null || andExpr.getChildren().isEmpty()) {
-            return Patterns.filter(getVarName(), this.name = getVarName() + currentIndex);
+            return Patterns.filter(ctx + "_" + varName, this.name = varName + currentIndex);
 
         } else if (andExpr.getChildren().size() == 1) {
-            return Patterns.filter(Filter.create(getVarName(), andExpr.getChildren().get(0)), getVarName() + currentIndex);
+            return Patterns.filter(Filter.create(ctx + "_" + varName, andExpr.getChildren().get(0)), varName + currentIndex);
         }
 
-        return Patterns.filter(Filter.create(getVarName(), andExpr), getVarName() + currentIndex);
+        return Patterns.filter(Filter.create(ctx + "_" + varName, andExpr), varName + currentIndex);
     }
 
-    public PatternExpr toEPL(List<NormalFormDeclaration> filters_event, Map<String, String> var_named) {
+    public PatternExpr toEPL(String ctx, List<NormalFormDeclaration> filters_event, Map<String, String> var_named, Map<String, String> aliases) {
 
         if (var != null) {
             if (filters_event != null && !filters_event.isEmpty()) {
                 for (int i = 0; i < filters_event.size(); i++) {
-                    eventFilter = filters_event.get(i);
-                    eventFilter.build();
-                    if (eventFilter.getName() == null) {
-                        String name = getVarName() + i;
-                        eventFilter.setName(name);
+
+                    eventFilter = filters_event.get(i).build();
+
+                    String alias = eventFilter.getName();
+                    if (alias == null) {
+                        eventFilter.setName(alias = getVarName() + i);
+
                     }
 
-                    var_named.put(var.getURI(), eventFilter.getName());
+                    aliases.put(getVarName(), alias);
 
-                    if (var.equals(filters_event.get(i).getVar())) {
-                        return createFilter(i, filters_event);
+                    if (var.equals(eventFilter.getVar())) {
+                        return createFilter(ctx, i, filters_event);
                     }
                 }
             }
-
-            return Patterns.filter(getVarName(), this.name = getVarName() + 0);
         }
 
         if (bracketed || (operator == null || operator.isEmpty()) && patterns != null && patterns.size() == 1) {
-            return patterns.get(0).toEPL(filters_event, var_named);
+            return patterns.get(0).toEPL(ctx, filters_event, var_named, aliases);
         }
 
         PatternExpr pattern = null;
         if (operator != null) {
-            if ("within".equals(operator.toLowerCase())) {
+            String operator_name = operator.toLowerCase();
+            if ("within".equals(operator_name)) {
                 TimePeriodExpression timeExpr = patterns.get(1).toTimeExpr();
-                return Patterns.guard("timer", "within", new Expression[]{timeExpr}, patterns.get(0).toEPL(filters_event, var_named));
-            } else if ("every".equals(operator.toLowerCase())) {
-                return Patterns.every(patterns.get(0).toEPL(filters_event, var_named));
-            } else if ("not".equals(operator.toLowerCase())) {
-                return Patterns.not(patterns.get(0).toEPL(filters_event, var_named));
-            } else if ("->".equals(operator.toLowerCase())) {
+                return Patterns.guard("timer", "within", new Expression[]{timeExpr}, patterns.get(0).toEPL(ctx, filters_event, var_named, aliases));
+            } else if ("every".equals(operator_name)) {
+                return Patterns.every(patterns.get(0).toEPL(ctx, filters_event, var_named, aliases));
+            } else if ("not".equals(operator_name)) {
+                return Patterns.not(patterns.get(0).toEPL(ctx, filters_event, var_named, aliases));
+            } else if ("->".equals(operator_name)) {
                 pattern = Patterns.followedBy();
                 for (PatternDeclaration p : patterns) {
-                    ((PatternFollowedByExpr) pattern).add(p.toEPL(filters_event, var_named));
+                    ((PatternFollowedByExpr) pattern).add(p.toEPL(ctx, filters_event, var_named, aliases));
                 }
-            } else if ("or".equals(operator.toLowerCase())) {
+            } else if ("or".equals(operator_name)) {
                 pattern = Patterns.or();
                 for (PatternDeclaration p : patterns) {
-                    ((PatternOrExpr) pattern).add(p.toEPL(filters_event, var_named));
+                    ((PatternOrExpr) pattern).add(p.toEPL(ctx, filters_event, var_named, aliases));
                 }
-            } else if ("and".equals(operator.toLowerCase())) {
+            } else if ("and".equals(operator_name)) {
                 pattern = Patterns.and();
                 for (PatternDeclaration p : patterns) {
-                    ((PatternAndExpr) pattern).add(p.toEPL(filters_event, var_named));
+                    ((PatternAndExpr) pattern).add(p.toEPL(ctx, filters_event, var_named, aliases));
                 }
 
             }

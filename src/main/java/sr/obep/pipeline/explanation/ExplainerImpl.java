@@ -7,6 +7,7 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.model.parameters.OntologyCopy;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
+import sr.obep.data.content.ContentAxioms;
 import sr.obep.data.content.ContentOntology;
 import sr.obep.data.events.RawEvent;
 import sr.obep.pipeline.processors.EventProcessor;
@@ -18,19 +19,28 @@ public class ExplainerImpl implements Explainer {
     private final String explainer_time = "timestamp_explainer";
     private EventProcessor next;
 
+    private final OWLOntology tbox;
+
+    public ExplainerImpl(OWLOntology ebox) {
+        this.tbox = ebox;
+    }
+
     @Override
     public Set<Set<OWLAxiom>> explain(OWLOntology ontology, OWLNamedIndividual message, OWLClass c) throws ExplanationException {
         PelletExplanation.setup();
         OWLReasoner reasoner = OpenlletReasonerFactory.getInstance().createReasoner(ontology);
         PelletExplanation expGen = new PelletExplanation((OpenlletReasoner) reasoner);
-        return expGen.getInstanceExplanations(message, c);
+        Set<Set<OWLAxiom>> instanceExplanations = expGen.getInstanceExplanations(message, c);
+        return instanceExplanations;
     }
 
     @Override
     public void send(RawEvent e) {
         try {
-            OWLOntology copy = OWLManager.createOWLOntologyManager().copyOntology(e.getContent().asOWLOntology(), OntologyCopy.SHALLOW);
+            final OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+            OWLOntology copy = manager.copyOntology(tbox, OntologyCopy.SHALLOW);
             OWLNamedIndividual event = e.getEventInvididual();
+            copy.add(e.getContent().asOWLAxioms());
 
             explain(copy, event, e.getType()).forEach(axioms -> {
                 RawEvent rawEvent = e.copy();

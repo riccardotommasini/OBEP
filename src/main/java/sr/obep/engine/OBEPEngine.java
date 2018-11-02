@@ -1,6 +1,7 @@
 package sr.obep.engine;
 
 
+import sr.obep.pipeline.processors.CEP;
 import sr.obep.programming.Program;
 
 /**
@@ -8,8 +9,8 @@ import sr.obep.programming.Program;
  */
 public interface OBEPEngine {
 
-    void register(Program q);
+    CEP register(Program q);
 
-    void register(String q);
+    CEP register(String q);
 
 }

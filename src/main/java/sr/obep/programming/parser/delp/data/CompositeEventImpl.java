@@ -1,6 +1,7 @@
-package sr.obep;
+package sr.obep.programming.parser.delp.data;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import sr.obep.data.events.CompositeEvent;
 import sr.obep.pipeline.normalization.NormalForm;
 
@@ -9,7 +10,8 @@ import java.util.Map;
 @AllArgsConstructor
 public class CompositeEventImpl implements CompositeEvent {
 
-    private String head, body;
+    private String head;
+    private String body;
     protected Map<String, NormalForm> normal_forms;
     protected Map<String, String> alias;
 

@@ -7,6 +7,10 @@ import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.impl.InfModelImpl;
+import org.apache.jena.reasoner.InfGraph;
+import org.apache.jena.reasoner.Reasoner;
+import org.apache.jena.reasoner.ReasonerRegistry;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
@@ -20,19 +24,30 @@ import java.util.*;
 @RequiredArgsConstructor
 public class SPARQLNormalForm implements NormalForm {
 
+    private final String context;
     private final Query query;
     private final OWLClass type;
 
-    public SPARQLNormalForm(String q, OWLClass c) {
+    private OWLOntology tbox;
+    private OntModel tboxrdf;
+    Reasoner reasoner = ReasonerRegistry.getOWLMiniReasoner();
+
+    public SPARQLNormalForm(String ctx, String q, OWLClass c) {
         this.query = QueryFactory.create(q);
         this.type = c;
+        this.context = ctx;
     }
 
     @Override
     public String toString() {
-        String name = type.getIRI().getShortForm();
-        return EPLFactory.toEPLSchema(name, query.getProjectVars(), "_" + name);
+        return toEPL(this.context);
     }
+
+
+    public String toEPL(String ctx) {
+        return EPLFactory.toEPLSchema(ctx + "_" + type.getIRI().getShortForm(), query.getProjectVars(), type.getIRI().getShortForm());
+    }
+
 
     @Override
     public OWLClass event() {
@@ -40,15 +55,28 @@ public class SPARQLNormalForm implements NormalForm {
     }
 
     @Override
-    public List<Map<String, Object>> apply(Content c) {
+    public List<Map<String, Object>> apply(Content abox) {
+        reasoner = reasoner.bindSchema(tboxrdf);
         try {
-            return exec(convert(c.asOWLOntology()), query);
-
+            OntModel converted_abox = convert(abox.asOWLOntology());
+            InfGraph bind = reasoner.bind(converted_abox.getGraph());
+            List<Map<String, Object>> exec = exec(new InfModelImpl(bind), query);
+            return exec;
 
         } catch (OWLOntologyStorageException e) {
             e.printStackTrace();
         }
         return new ArrayList<>();
+    }
+
+    @Override
+    public void tbox(OWLOntology tbox) {
+        this.tbox = tbox;
+        try {
+            this.tboxrdf = convert(tbox);
+        } catch (OWLOntologyStorageException e) {
+            e.printStackTrace();
+        }
     }
 
     private static List<Map<String, Object>> exec(Model model, Query sparql) {

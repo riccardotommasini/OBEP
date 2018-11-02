@@ -56,7 +56,7 @@ public class ExplainerTest extends TestCase {
         expected_explanation.add(bpa);
         expected_explanation.add(equivalentClassesAxiom);
 
-        Explainer explainer = new ExplainerImpl();
+        Explainer explainer = new ExplainerImpl(o);
 
         List<OWLClass> collect = reasoner.getTypes(a, true).entities().collect(Collectors.toList());
         assertEquals(1, collect.size());
@@ -148,7 +148,7 @@ public class ExplainerTest extends TestCase {
 
         };
 
-        Explainer explainer = new ExplainerImpl();
+        Explainer explainer = new ExplainerImpl(o);
         explainer.pipe(tester);
 
         explainer.send(message);

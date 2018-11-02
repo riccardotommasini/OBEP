@@ -17,6 +17,7 @@ import org.apache.jena.sparql.expr.aggregate.Aggregator;
 import org.apache.jena.sparql.syntax.ElementGroup;
 import org.apache.jena.sparql.syntax.Template;
 import org.apache.jena.sparql.syntax.TripleCollectorMark;
+import sr.obep.programming.parser.delp.OBEPParserOutput;
 
 /**
  * Created by Riccardo on 05/08/16.

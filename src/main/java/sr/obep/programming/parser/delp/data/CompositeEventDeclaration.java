@@ -7,7 +7,9 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.ExprFunction;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementFilter;
+import sr.obep.pipeline.normalization.NormalForm;
 
+import java.io.StringWriter;
 import java.util.*;
 
 /**
@@ -21,6 +23,9 @@ public class CompositeEventDeclaration extends ComplexEventDeclaration {
     private List<NormalFormDeclaration> filters_var;
     private List<ElementFilter> filters = new ArrayList<>();
     private Map<String, String> var_named = new HashMap<>();
+    private Map<String, String> aliases = new HashMap<>();
+
+    private Map<String, NormalForm> nfs = new HashMap<>();
 
     public CompositeEventDeclaration(Node head) {
         super(head);
@@ -45,12 +50,17 @@ public class CompositeEventDeclaration extends ComplexEventDeclaration {
         return joinVariables;
     }
 
-    public EPStatementObjectModel toEpl() {
+    public String toEpl() {
         EPStatementObjectModel model = new EPStatementObjectModel();
         model.setSelectClause(SelectClause.createWildcard());
-        PatternExpr pattern = expr.toEPL(filter_events, var_named);
-        model.setFromClause(FromClause.create(PatternStream.create(pattern)));
-        return model;
+        PatternExpr pattern = expr.toEPL(head.getIRI().getShortForm(), filter_events, var_named, aliases);
+        FromClause fromClause = FromClause.create(PatternStream.create(pattern));
+        model.setFromClause(fromClause);
+        StringWriter writer = new StringWriter();
+
+        EPStatementFormatter formatter= new EPStatementFormatter();
+        fromClause.getStreams().get(0).toEPL(writer, formatter);
+        return writer.toString();
     }
 
     public void addEventFilter(NormalFormDeclaration pop) {
@@ -83,7 +93,7 @@ public class CompositeEventDeclaration extends ComplexEventDeclaration {
 
     @Override
     public String toString() {
-        return toEpl().toEPL();
+        return toEpl();
     }
 
     public void addFilter(ElementFilter pop) {
@@ -104,5 +114,9 @@ public class CompositeEventDeclaration extends ComplexEventDeclaration {
         }
         //ELSE, is a generic filter to evaluate at the EPL Level
         filters.add(pop);
+    }
+
+    public Map<String, String> getVariableAliases() {
+        return aliases;
     }
 }

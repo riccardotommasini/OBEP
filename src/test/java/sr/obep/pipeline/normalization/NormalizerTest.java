@@ -50,8 +50,8 @@ public class NormalizerTest extends TestCase {
         contentA.add(equivalentClassesAxiom);
 
 
-        Normalizer normalizer = new SPARQLNormalizer();
-        NormalForm normalForm = new SPARQLNormalForm("SELECT * WHERE {?s <http://example.org#p> ?o }", A);
+        Normalizer normalizer = new SPARQLNormalizer(o, new HashMap<>(), "");
+        NormalForm normalForm = new SPARQLNormalForm("", "SELECT * WHERE {?s <http://example.org#p> ?o }", A);
         normalizer.addNormalForm(normalForm);
 
         List<Map<String, Object>> actual_normal_forms = normalizer.normalize(A, new ContentOntology(contentA));
@@ -138,7 +138,7 @@ public class NormalizerTest extends TestCase {
             }
         };
 
-        Explainer explainer = new ExplainerImpl();
+        Explainer explainer = new ExplainerImpl(o);
         explainer.pipe(tester);
 
         explainer.send(message);

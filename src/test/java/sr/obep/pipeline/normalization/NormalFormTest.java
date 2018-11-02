@@ -16,7 +16,7 @@ public class NormalFormTest {
 
         OWLClass A = factory.getOWLClass(base + "A");
 
-        NormalForm normalForm = new SPARQLNormalForm("SELECT ?s ?o WHERE {?s <http://example.org#p> ?o }", A);
+        NormalForm normalForm = new SPARQLNormalForm("","SELECT ?s ?o WHERE {?s <http://example.org#p> ?o }", A);
 
         System.out.println(normalForm.toString());
     }

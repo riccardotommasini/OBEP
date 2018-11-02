@@ -24,6 +24,7 @@ public class NormalFormDeclaration {
     private Set<Var> vars;
     private ElementGroup clause;
     private String name;
+    private String context;
 
     public NormalFormDeclaration(Element element) {
         clause = new ElementGroup();
@@ -48,7 +49,7 @@ public class NormalFormDeclaration {
         vars.add(n);
     }
 
-    public void build() {
+    public NormalFormDeclaration build() {
         for (Element element : clause.getElements()) {
             if (element instanceof ElementPathBlock) {
                 ElementPathBlock e = (ElementPathBlock) element;
@@ -67,6 +68,7 @@ public class NormalFormDeclaration {
                 }
             }
         }
+        return this;
     }
 
     public Query toSPARQL(Set<Var> select) {
@@ -99,4 +101,5 @@ public class NormalFormDeclaration {
             this.build();
         return vars;
     }
+
 }

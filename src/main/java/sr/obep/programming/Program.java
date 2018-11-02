@@ -1,5 +1,6 @@
 package sr.obep.programming;
 
+import org.semanticweb.owlapi.model.OWLOntology;
 import sr.obep.data.events.CompositeEvent;
 import sr.obep.data.events.LogicalEvent;
 import sr.obep.data.streams.EventStream;
@@ -12,14 +13,15 @@ import java.util.Set;
  */
 public interface Program {
 
+    OWLOntology getOntology();
 
     Set<Prefix> getPrefixes();
 
     Set<EventStream> getInputStreams();
 
-    Set<LogicalEvent> getLogicalEvents();
+    Set<? extends LogicalEvent> getLogicalEvents();
 
-    Set<CompositeEvent> getCompositeEvents();
+    Set<? extends CompositeEvent> getCompositeEvents();
 
     Set<String> getOutputStreams();
 

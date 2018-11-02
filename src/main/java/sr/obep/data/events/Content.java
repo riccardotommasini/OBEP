@@ -7,7 +7,6 @@ import java.util.Set;
 
 public interface Content {
 
-
     OWLOntology asOWLOntology();
 
     Set<OWLAxiom> asOWLAxioms();

@@ -8,8 +8,8 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.model.parameters.OntologyCopy;
 import org.semanticweb.owlapi.reasoner.InferenceType;
+import org.semanticweb.owlapi.reasoner.NodeSet;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
-import sr.obep.data.content.ContentOntology;
 import sr.obep.data.events.RawEvent;
 import sr.obep.pipeline.processors.EventProcessor;
 
@@ -38,7 +38,8 @@ public class AbstracterImpl implements Abstracter {
         OWLReasoner reasoner = OpenlletReasonerFactory.getInstance().createReasoner(copy);
         reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY);
         reasoner.flush();
-        return reasoner.getTypes(event, true).entities().filter(not(OWL.Thing::equals)).collect(Collectors.toSet());
+        NodeSet<OWLClass> types = reasoner.getTypes(event, false);
+        return types.entities().filter(not(OWL.Thing::equals)).collect(Collectors.toSet());
 
     }
 
@@ -49,11 +50,13 @@ public class AbstracterImpl implements Abstracter {
             OWLOntology copy = manager.copyOntology(tbox, OntologyCopy.SHALLOW);
             copy.add(e.getContent().asOWLAxioms());
 
-            lift(copy, e.getEventInvididual()).forEach(c -> {
+
+            OWLNamedIndividual eventInvididual = e.getEventInvididual();
+            lift(copy, eventInvididual).forEach(c -> {
                 RawEvent event = e.copy();
                 event.put(abstracter_time, System.currentTimeMillis());
                 event.setType(c);
-                event.setContent(new ContentOntology(copy));
+                // event.setContent(new ContentOntology(copy));
                 next.send(event);
             });
 

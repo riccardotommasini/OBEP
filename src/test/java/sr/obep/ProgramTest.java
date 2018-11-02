@@ -3,13 +3,17 @@ package sr.obep;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import sr.obep.data.content.ContentAxioms;
-import sr.obep.data.events.*;
+import sr.obep.data.events.CompositeEvent;
+import sr.obep.data.events.LogicalEvent;
+import sr.obep.data.events.RawEvent;
 import sr.obep.data.streams.EventStream;
 import sr.obep.data.streams.WritableEventStream;
 import sr.obep.engine.OBEPEngineImpl;
 import sr.obep.pipeline.normalization.NormalForm;
 import sr.obep.pipeline.normalization.SPARQLNormalForm;
 import sr.obep.programming.Program;
+import sr.obep.programming.parser.delp.data.CompositeEventImpl;
+import sr.obep.programming.parser.delp.data.LogicalEventImpl;
 import sr.obep.programming.parser.sparql.Prefix;
 
 import java.util.HashMap;
@@ -83,13 +87,13 @@ public class ProgramTest {
         //NAMED
         Set<String> outputs = new HashSet<>();
         outputs.add("H");
-       // outputs.add("A");
+        // outputs.add("A");
 
         //RETURN FORMAT RDF | EVENT define which listener to use
 
         Set<LogicalEvent> les = new HashSet<>();
-        les.add(new LogicalEventImpl("A := :B and :p some :C"));
-        les.add(new LogicalEventImpl("D := :E and :q some :F"));
+        les.add(new LogicalEventImpl("A", ":B and :p some :C"));
+        les.add(new LogicalEventImpl("D", ":E and :q some :F"));
 
         // TODO les.add(new LogicalEventImpl("B := :q some :B"));
         // EVENT H MATCH every (A -> C)
@@ -104,8 +108,8 @@ public class ProgramTest {
         String head = "H";
         String body = "every (a=A -> b=D)";
 
-        NormalForm nfa = new SPARQLNormalForm("SELECT * WHERE {?s <http://example.org#p> ?c }", df.getOWLClass(engine + "A"));
-        NormalForm nfc = new SPARQLNormalForm("SELECT * WHERE {?s <http://example.org#q> ?f }", df.getOWLClass(engine + "D"));
+        NormalForm nfa = new SPARQLNormalForm("", "SELECT * WHERE {?s <http://example.org#p> ?c }", df.getOWLClass(engine + "A"));
+        NormalForm nfc = new SPARQLNormalForm("", "SELECT * WHERE {?s <http://example.org#q> ?f }", df.getOWLClass(engine + "D"));
 
         Map<String, NormalForm> normalFormMap = new HashMap<>();
         normalFormMap.put("A", nfa);
@@ -118,6 +122,11 @@ public class ProgramTest {
         ces.add(new CompositeEventImpl(head, body, normalFormMap, alias));
 
         Program program = new Program() {
+
+            @Override
+            public OWLOntology getOntology() {
+                return dbox;
+            }
 
             @Override
             public Set<Prefix> getPrefixes() {
@@ -145,10 +154,11 @@ public class ProgramTest {
             }
         };
 
-        OBEPEngineImpl obepEngine = new OBEPEngineImpl(engine, dbox);
+        OBEPEngineImpl obepEngine = new OBEPEngineImpl(engine);
 
+        //TODO modificare il parser to extract the match rule decomposed:
+        // pattern, normal forms, filters
         obepEngine.register(program);
-
 
         RawEvent event = new RawEvent(base + "1");
         event.setContent(new ContentAxioms(axioms));

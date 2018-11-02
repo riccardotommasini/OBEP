@@ -23,6 +23,7 @@ public class RawEvent extends HashMap<String, Object> implements Serializable {
     private static final String content = "event_content";
     private static final String ingestion_time = "timestamp_sys";
     private static final String event_time = "timestamp_event";
+    private static final String context = "context";
 
     public RawEvent(String packetID) {
         put(ingestion_time, System.currentTimeMillis());
@@ -34,6 +35,7 @@ public class RawEvent extends HashMap<String, Object> implements Serializable {
     private String packetID;
 
     @Getter
+    @Setter
     private OWLNamedIndividual eventInvididual;
 
     @Setter
@@ -84,5 +86,13 @@ public class RawEvent extends HashMap<String, Object> implements Serializable {
     public int hashCode() {
 
         return Objects.hash(super.hashCode(), packetID, timeStamp, stream_uri);
+    }
+
+    public void setContext(String ctx) {
+        put(context, ctx);
+    }
+
+    public String getContext() {
+        return (String) get(context);
     }
 }

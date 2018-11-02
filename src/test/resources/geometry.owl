@@ -1,0 +1,159 @@
+Prefix: : <http://www.example.org/geometry#>
+Prefix: owl: <http://www.w3.org/2002/07/owl#>
+Prefix: rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+Prefix: rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+Prefix: xml: <http://www.w3.org/XML/1998/namespace>
+Prefix: xsd: <http://www.w3.org/2001/XMLSchema#>
+
+Ontology: <http://www.example.org/geometry>
+
+AnnotationProperty: rdfs:comment
+    
+Datatype: rdf:PlainLiteral
+
+    
+ObjectProperty: revolutes
+
+    Annotations: 
+        rdfs:comment "rotates around axses of revolution"
+    
+    SubPropertyOf: 
+        rotates
+    
+    
+ObjectProperty: rotates
+
+    SubPropertyOf: 
+        transforms
+    
+    
+ObjectProperty: rototraslates
+
+    SubPropertyOf: 
+        transforms
+    
+    SubPropertyChain: 
+        rotates o translates
+    
+    
+ObjectProperty: transforms
+
+    Range: 
+        Figure
+    
+    
+ObjectProperty: translarotates
+
+    SubPropertyOf: 
+        transforms
+    
+    SubPropertyChain: 
+        translates o rotates
+    
+    
+ObjectProperty: translates
+
+    SubPropertyOf: 
+        transforms
+    
+    
+Class: Circle
+
+    SubClassOf: 
+        Plane
+    
+    
+Class: Cone
+
+    EquivalentTo: 
+        Triangle
+         and ( inverse (revolutes) some owl:Thing)
+    
+    SubClassOf: 
+        Solid
+    
+    
+Class: Cylinder
+
+    EquivalentTo: 
+        Rectangle
+         and ( inverse (revolutes) some owl:Thing)
+    
+    SubClassOf: 
+        Solid
+    
+    
+Class: Equilateral
+
+    SubClassOf: 
+        Triangle
+    
+    
+Class: Figure
+
+    
+Class: Isosceles
+
+    SubClassOf: 
+        Triangle
+    
+    
+Class: Plane
+
+    SubClassOf: 
+        Figure
+    
+    
+Class: Rectangle
+
+    SubClassOf: 
+        Plane
+    
+    
+Class: Rhombus
+
+    SubClassOf: 
+        Plane
+    
+    
+Class: Scalene
+
+    SubClassOf: 
+        Triangle
+    
+    
+Class: Solid
+
+    SubClassOf: 
+        Figure
+    
+    
+Class: Sphere
+
+    EquivalentTo: 
+        Circle
+         and ( inverse (revolutes) some owl:Thing)
+    
+    SubClassOf: 
+        Solid
+    
+    
+Class: Square
+
+    SubClassOf: 
+        Rectangle
+    
+    
+Class: Trapezoid
+
+    SubClassOf: 
+        Plane
+    
+    
+Class: Triangle
+
+    SubClassOf: 
+        Plane
+    
+    
+Class: owl:Thing

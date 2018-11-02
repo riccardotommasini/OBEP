@@ -1,0 +1,24 @@
+PREFIX : <http://www.example.org/geometry#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+VOCAB </Users/riccardo/_Projects/Semantic/delp/src/test/resources/geometry.owl>
+
+FROM GRAPH <http://www.static.org>
+
+FROM STREAM <http://www.stream.org/stream1>
+
+NAMED EVENT :ObsFig2D AS :Plane
+
+NAMED EVENT :ObsFig3D AS :Solid
+
+NAMED EVENT :ObsFigTransform AS :transforms some
+
+NAMED EVENT :ObsFig3D {
+     MATCH every (:ObsFig2D -> :ObsFigTransform) WITHIN (5 s)
+     IF {
+        EVENT :ObsFig2D { ?x rdf:type :Figure  }
+        EVENT :ObsFigTransform { ?y :transforms ?x  }
+     }
+}
+
+RETURN :ObsFig3D AS RDF STREAM

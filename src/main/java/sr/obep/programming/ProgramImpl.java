@@ -1,8 +1,7 @@
 package sr.obep.programming;
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Setter;
+import org.semanticweb.owlapi.model.OWLOntology;
 import sr.obep.data.events.CompositeEvent;
 import sr.obep.data.events.LogicalEvent;
 import sr.obep.data.streams.EventStream;
@@ -17,12 +16,21 @@ import java.util.Set;
 @AllArgsConstructor
 public final class ProgramImpl implements Program {
 
-    @Setter(AccessLevel.PACKAGE)
-    private final Set<Prefix> prefixes = new HashSet<>();
-    private final Set<EventStream> inputstreams = new HashSet<>();
-    private final Set<String> outpustreams = new HashSet<>();
-    private final Set<LogicalEvent> logicalEvents = new HashSet<>();
-    private final Set<CompositeEvent> compositeEvents = new HashSet<>();
+    private final Set<Prefix> prefixes;
+
+    private final OWLOntology dbox;
+
+    private final Set<EventStream> inputstreams;
+
+    private final Set<LogicalEvent> logicalEvents;
+    private final Set<CompositeEvent> compositeEvents;
+
+    private final Set<String> outpustreams;
+
+    @Override
+    public OWLOntology getOntology() {
+        return dbox;
+    }
 
     @Override
     public Set<Prefix> getPrefixes() {
