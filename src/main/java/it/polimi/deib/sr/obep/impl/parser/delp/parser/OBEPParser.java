@@ -1,16 +1,12 @@
 package it.polimi.deib.sr.obep.impl.parser.delp.parser;
 
 import it.polimi.deib.sr.obep.impl.parser.delp.declarations.*;
+import it.polimi.deib.sr.obep.impl.parser.sparql.Prefix;
 import it.polimi.deib.sr.obep.impl.parser.sparql.SPARQLParser;
-import sr.obep.impl.parser.delp.declarations.*;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Node_URI;
 import org.apache.jena.sparql.syntax.ElementFilter;
 import org.parboiled.Rule;
-import sr.obep.core.impl.parser.delp.declarations.*;
-import it.polimi.deib.sr.obep.impl.parser.sparql.Prefix;
-import sr.obep.test.impl.parser.delp.declarations.*;
-import tests.impl.parser.delp.declarations.*;
 
 /**
  * Created by Riccardo on 09/08/16.
@@ -38,7 +34,7 @@ public class OBEPParser extends SPARQLParser {
     }
 
     public Rule SelectedStreams() {
-        return OneOrMore(IriRef(), push(((ResultClause) pop(1)).addReturnEvent((Node)pop())));
+        return OneOrMore(IriRef(), push(((ResultClause) pop(1)).addReturnEvent((Node) pop())));
     }
 
     public Rule DataClause() {

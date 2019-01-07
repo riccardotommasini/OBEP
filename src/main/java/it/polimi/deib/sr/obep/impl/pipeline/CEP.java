@@ -33,7 +33,7 @@ public class CEP implements EventProcessor, EventStreamManager {
         configuration.getEngineDefaults().getLogging().setEnableExecutionDebug(true);
         configuration.getEngineDefaults().getLogging().setEnableTimerDebug(true);
 
-        configuration.addPlugInSingleRowFunction("merge2", "sr.sr.obep.parser.content.ContentUtils", "merge2");
+        configuration.addPlugInSingleRowFunction("merge2", "it.polimi.deib.sr.obep.impl.content.ContentUtils", "merge2");
 
         this.epService = EPServiceProviderManager.getDefaultProvider(configuration);
         this.cep = this.epService.getEPRuntime();

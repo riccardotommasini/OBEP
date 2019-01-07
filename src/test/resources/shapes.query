@@ -5,7 +5,7 @@ VOCAB </Users/rictomm/_Projects/Semantic/StreamReasoning/SR/delp/src/test/resour
 
 FROM GRAPH <http://www.static.org>
 
-FROM STREAM <http://www.stream.org/stream1>
+FROM STREAM <http://www.stream.org/shapestream>
 
 NAMED EVENT :ObsFig2D AS :Plane
 

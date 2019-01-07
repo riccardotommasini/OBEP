@@ -74,7 +74,7 @@ public class OBEPEngineImpl implements OBEPEngine {
 
                         //I still create schemaless logical streams because i want the schemafull ones to inherit from these.
                         //TODO THE SCHEMA MUST DEPEND ON THE NORMAL FORM
-                        String new_event = "create schema " + head + " as (event_content sr.sr.obep.parser.events.Content)";
+                        String new_event = "create schema " + head + " as (event_content it.polimi.deib.sr.obep.core.data.events.Content)";
 
                         epl_program_builder.add(new_event);
                         cep.register_event_schema(new_event);
