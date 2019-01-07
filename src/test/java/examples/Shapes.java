@@ -8,15 +8,15 @@ import org.parboiled.support.ParsingResult;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.StringDocumentSource;
 import org.semanticweb.owlapi.model.*;
-import sr.obep.data.content.ContentAxioms;
-import sr.obep.data.events.RawEvent;
-import sr.obep.data.streams.EventStream;
-import sr.obep.engine.OBEPEngine;
-import sr.obep.engine.OBEPEngineImpl;
-import sr.obep.parser.ParserTest;
-import sr.obep.programming.Program;
-import sr.obep.programming.parser.delp.OBEPParser;
-import sr.obep.programming.parser.delp.OBEPParserOutput;
+import sr.obep.impl.content.ContentAxioms;
+import sr.obep.impl.RawEvent;
+import sr.obep.core.data.streams.EventStream;
+import sr.obep.core.engine.OBEPEngine;
+import sr.obep.impl.OBEPEngineImpl;
+import sr.obep.core.parser.ParserTest;
+import sr.obep.core.programming.Program;
+import sr.obep.impl.parser.delp.parser.OBEPParser;
+import sr.obep.impl.parser.delp.parser.OBEPParserOutput;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,7 +42,7 @@ public class Shapes {
 
         obepEngine.register(program);
 
-        //runtime data
+        //runtime parser
 
         EventStream sin = program.getInputStreams().iterator().next();
 
