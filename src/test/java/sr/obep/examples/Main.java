@@ -1,6 +1,5 @@
 package sr.obep.examples;
 
-import com.espertech.esper.client.EventBean;
 import org.apache.commons.io.IOUtils;
 import org.parboiled.Parboiled;
 import org.parboiled.errors.ParseError;
@@ -13,7 +12,6 @@ import sr.obep.data.content.ContentAxioms;
 import sr.obep.data.events.RawEvent;
 import sr.obep.data.streams.WritableEventStream;
 import sr.obep.engine.OBEPEngineImpl;
-import sr.obep.pipeline.processors.CEP;
 import sr.obep.programming.Program;
 import sr.obep.programming.parser.delp.DELPParser;
 import sr.obep.programming.parser.delp.OBEPParserOutput;
@@ -21,9 +19,7 @@ import sr.obep.programming.parser.delp.OBEPParserOutput;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class Main {
@@ -46,6 +42,7 @@ public class Main {
 
     public static void main(String[] args) throws OWLOntologyCreationException {
 
+        WritableEventStream sin = new WritableEventStream("http://www.stream.org/stream1");
 
         URL resource = ParserTest.class.getResource("/shapes.query");
 
@@ -57,24 +54,23 @@ public class Main {
 
         if (result.hasErrors()) {
             for (ParseError arg : result.parseErrors) {
-                System.out.println(query.substring(0, arg.getStartIndex()) + "|->" + query.substring(arg.getStartIndex(), arg.getEndIndex()) + "<-|" + query.substring(arg.getEndIndex() + 1, query.length() - 1));
+                System.err.println(query.substring(0, arg.getStartIndex()) + "|->" + query.substring(arg.getStartIndex(), arg.getEndIndex()) + "<-|" + query.substring(arg.getEndIndex() + 1, query.length() - 1));
             }
         }
 
-        WritableEventStream sin = new WritableEventStream("http://www.stream.org/stream1");
-
         OBEPParserOutput q = result.resultValue;
+
+        //runtime engine and program
 
         Program program = q.asProgram();
 
         program.getInputStreams().add(sin);
 
         OBEPEngineImpl obepEngine = new OBEPEngineImpl(base);
+        obepEngine.register(program);
 
-        //TODO modificare il parser to extract the match rule decomposed:
-        // pattern, normal forms, filters
-        CEP cep = obepEngine.register(program);
 
+        //runtime data
         RawEvent event = new RawEvent(base + "square1");
         event.setContent(new ContentAxioms(getAxioms1()));
         event.setStream_uri("http://www.stream.org/stream1");
@@ -89,7 +85,6 @@ public class Main {
 
         sin.put(event1);
         System.out.println("<---------END--------->");
-
 
 
     }

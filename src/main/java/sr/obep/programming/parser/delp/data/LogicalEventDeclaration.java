@@ -16,7 +16,7 @@ import java.util.*;
  * rule. - The body, //TODO parse it, is the right part of the DL rule. - filter_events
  * is a SPARQL-Like constraint for the event instances.
  */
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 @Data
 public class LogicalEventDeclaration extends ComplexEventDeclaration {
 

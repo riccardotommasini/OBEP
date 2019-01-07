@@ -1,6 +1,8 @@
 package sr.obep.programming.parser.delp;
 
+import com.espertech.esper.client.soda.PatternStream;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j;
 import org.apache.jena.graph.Node;
@@ -43,6 +45,8 @@ import static org.semanticweb.owlapi.util.OWLAPIStreamUtils.asList;
  */
 @Log4j
 @Data
+@EqualsAndHashCode(callSuper = false)
+
 @NoArgsConstructor
 public class OBEPParserOutput extends SPARQLQuery implements ProgramDeclaration {
 
@@ -229,11 +233,11 @@ public class OBEPParserOutput extends SPARQLQuery implements ProgramDeclaration 
                             IRI ctx = IRI.create(nfd.getContext());
 
                             normalforms.put(name.getShortForm(),
-                                    new SPARQLNormalForm(ctx.getShortForm(),nfd.toSPARQL(),
+                                    new SPARQLNormalForm(ctx.getShortForm(), nfd.toSPARQL(),
                                             df.getOWLClass(name)));
                         });
 
-                        return new CompositeEventImpl(ced.getName(), ced.toEpl(), normalforms, ced.getVariableAliases());
+                        return new CompositeEventImpl(ced.getName(), PatternStream.create(ced.toEpl()), normalforms, ced.getVariableAliases());
 
                     }).collect(Collectors.toSet());
 

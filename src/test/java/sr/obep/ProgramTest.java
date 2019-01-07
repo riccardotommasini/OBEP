@@ -1,5 +1,6 @@
 package sr.obep;
 
+import com.espertech.esper.client.soda.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import sr.obep.data.content.ContentAxioms;
@@ -106,10 +107,12 @@ public class ProgramTest {
 
         //todo add to composite event the a map <epl_var_name,event_name>
         String head = "H";
-        String body = "every (a=A -> b=D)";
 
-        NormalForm nfa = new SPARQLNormalForm("", "SELECT * WHERE {?s <http://example.org#p> ?c }", df.getOWLClass(engine + "A"));
-        NormalForm nfc = new SPARQLNormalForm("", "SELECT * WHERE {?s <http://example.org#q> ?f }", df.getOWLClass(engine + "D"));
+        PatternFollowedByExpr followedby = new PatternFollowedByExpr(new PatternFilterExpr(Filter.create("A"), "a"), new PatternFilterExpr(Filter.create("D"), "b"));
+        PatternStream body = PatternStream.create(new PatternEveryExpr(followedby));
+
+        NormalForm nfa = new SPARQLNormalForm(head, "SELECT * WHERE {?s <http://example.org#p> ?c }", df.getOWLClass(engine + "A"));
+        NormalForm nfc = new SPARQLNormalForm(head, "SELECT * WHERE {?s <http://example.org#q> ?f }", df.getOWLClass(engine + "D"));
 
         Map<String, NormalForm> normalFormMap = new HashMap<>();
         normalFormMap.put("A", nfa);

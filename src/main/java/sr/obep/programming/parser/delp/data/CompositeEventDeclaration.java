@@ -1,6 +1,9 @@
 package sr.obep.programming.parser.delp.data;
 
-import com.espertech.esper.client.soda.*;
+import com.espertech.esper.client.soda.EPStatementFormatter;
+import com.espertech.esper.client.soda.FromClause;
+import com.espertech.esper.client.soda.PatternExpr;
+import com.espertech.esper.client.soda.PatternStream;
 import lombok.Data;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
@@ -50,17 +53,9 @@ public class CompositeEventDeclaration extends ComplexEventDeclaration {
         return joinVariables;
     }
 
-    public String toEpl() {
-        EPStatementObjectModel model = new EPStatementObjectModel();
-        model.setSelectClause(SelectClause.createWildcard());
+    public PatternExpr toEpl() {
         PatternExpr pattern = expr.toEPL(head.getIRI().getShortForm(), filter_events, var_named, aliases);
-        FromClause fromClause = FromClause.create(PatternStream.create(pattern));
-        model.setFromClause(fromClause);
-        StringWriter writer = new StringWriter();
-
-        EPStatementFormatter formatter= new EPStatementFormatter();
-        fromClause.getStreams().get(0).toEPL(writer, formatter);
-        return writer.toString();
+        return pattern;
     }
 
     public void addEventFilter(NormalFormDeclaration pop) {
@@ -93,7 +88,11 @@ public class CompositeEventDeclaration extends ComplexEventDeclaration {
 
     @Override
     public String toString() {
-        return toEpl();
+        FromClause fromClause = FromClause.create(PatternStream.create(toEpl()));
+        StringWriter writer = new StringWriter();
+        EPStatementFormatter formatter = new EPStatementFormatter();
+        fromClause.getStreams().get(0).toEPL(writer, formatter);
+        return writer.toString();
     }
 
     public void addFilter(ElementFilter pop) {

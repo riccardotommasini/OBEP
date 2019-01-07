@@ -1,0 +1,63 @@
+Prefix: owl: <http://www.w3.org/2002/07/owl#>
+Prefix: rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+Prefix: rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+Prefix: xml: <http://www.w3.org/XML/1998/namespace>
+Prefix: xsd: <http://www.w3.org/2001/XMLSchema#>
+
+
+
+Ontology: 
+
+ObjectProperty: <http://example.org#p>
+
+    SubPropertyOf: 
+        owl:topObjectProperty
+    
+    
+ObjectProperty: owl:topObjectProperty
+
+    
+Class: <http://example.org#A>
+
+    SubClassOf: 
+        owl:Thing
+    
+    DisjointWith: 
+        owl:Nothing
+    
+    
+Class: <http://example.org#B>
+
+    SubClassOf: 
+        owl:Thing
+    
+    DisjointWith: 
+        owl:Nothing
+    
+    
+Class: owl:Nothing
+
+    DisjointWith: 
+        <http://example.org#A>, <http://example.org#B>
+    
+    
+Class: owl:Thing
+
+    
+Individual: <http://example.org#a>
+
+    Types: 
+        <http://example.org#A>,
+        owl:Thing
+    
+    Facts:  
+     <http://example.org#p>  <http://example.org#b>
+    
+    
+Individual: <http://example.org#b>
+
+    Types: 
+        <http://example.org#B>,
+        owl:Thing
+    
+    

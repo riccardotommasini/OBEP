@@ -27,17 +27,16 @@ public class OBEPEngineImpl implements OBEPEngine {
     public final IRI base;
     public static final ProgramManager manager = new ProgramManagerImpl();
     private final String outStream = "OutStream";
-
-    String out_pattern = "select * from " + outStream;
+    private final String out_pattern = "select * from " + outStream;
+    private CEP cep;
 
     public OBEPEngineImpl(IRI base) {
         this.base = base;
+        this.cep = new CEP();
     }
 
     @Override
-    public CEP register(Program q) {
-        CEP cep = new CEP();
-
+    public void register(Program q) {
         try {
 
             OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -102,10 +101,8 @@ public class OBEPEngineImpl implements OBEPEngine {
 
                     String new_event = nf.toString();
 
-
                     epl_program_builder.add(new_event);
                     cep.register_event_schema(new_event);
-
 
                     active_normal_forms.put(nf.event(), nf);
 
@@ -166,17 +163,15 @@ public class OBEPEngineImpl implements OBEPEngine {
             e.printStackTrace();
         }
 
-        return cep;
     }
 
     private String connectTo(StringJoiner output_stream_builder, String udf, String head, String stream, String[] projections) {
         EPStatementObjectModel model = new EPStatementObjectModel();
         model.insertInto(InsertIntoClause.create(head));
         model.setFromClause(FromClause.create(FilterStream.create(stream)));
-        SelectClause selectClause;
+        SelectClause selectClause = null;
         if (udf == null || udf.isEmpty()) {
             if (projections == null) {
-                selectClause = SelectClause.createWildcard();
             } else {
                 selectClause = SelectClause.create(projections);
             }
@@ -196,8 +191,8 @@ public class OBEPEngineImpl implements OBEPEngine {
     }
 
     @Override
-    public CEP register(String q) {
-        return register(manager.parse(q));
+    public void register(String q) {
+        register(manager.parse(q));
     }
 
 //    public void sendEvent(RawEvent se) {

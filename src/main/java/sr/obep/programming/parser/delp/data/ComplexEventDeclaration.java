@@ -19,8 +19,6 @@ public class ComplexEventDeclaration {
     @Setter
     protected OWLClass head;
 
-
-
     @Setter
 
     protected String uri;

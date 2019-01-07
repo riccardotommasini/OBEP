@@ -1,6 +1,5 @@
 package sr.obep.examples;
 
-import com.espertech.esper.client.soda.EPStatementObjectModel;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.parboiled.Parboiled;
@@ -26,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashSet;
+import java.util.Set;
 
 import static org.semanticweb.owlapi.util.OWLAPIStreamUtils.asList;
 
@@ -95,11 +95,11 @@ public class ParserTest {
 
         o.axioms().forEach(System.out::println);
 
-        q.getCompositeEvents().stream().map(ced->ced.getExpr().toString()).forEach(System.out::println);
+        q.getCompositeEvents().stream().map(ced -> ced.getExpr().toString()).forEach(System.err::println);
+
+        Set<CompositeEventDeclaration> compositeEvents = q.getCompositeEvents();
 
 
-        q.getCompositeEvents().stream().flatMap(ce -> ce.getVar_named().entrySet().stream())
-                .forEach(e -> System.out.println(e.getKey() + " " + e.getValue()));
     }
 
 

@@ -1,6 +1,7 @@
 package sr.obep.programming.parser.sparql;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Node_URI;
@@ -17,12 +18,12 @@ import org.apache.jena.sparql.expr.aggregate.Aggregator;
 import org.apache.jena.sparql.syntax.ElementGroup;
 import org.apache.jena.sparql.syntax.Template;
 import org.apache.jena.sparql.syntax.TripleCollectorMark;
-import sr.obep.programming.parser.delp.OBEPParserOutput;
 
 /**
  * Created by Riccardo on 05/08/16.
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 public class SPARQLQuery extends Query {
 
