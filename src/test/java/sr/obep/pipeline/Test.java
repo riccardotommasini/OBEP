@@ -1,4 +1,4 @@
-package sr.obep;
+package sr.obep.pipeline;
 
 import com.espertech.esper.client.soda.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -22,7 +22,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class ProgramTest {
+public class Test {
 
     public static final IRI base = IRI.create("http://example.org#");
     public static final IRI engine = IRI.create("http://obep.org#");

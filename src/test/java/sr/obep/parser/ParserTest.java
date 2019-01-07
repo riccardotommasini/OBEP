@@ -1,4 +1,4 @@
-package sr.obep.examples;
+package sr.obep.parser;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
@@ -15,7 +15,7 @@ import org.semanticweb.owlapi.util.BidirectionalShortFormProviderAdapter;
 import org.semanticweb.owlapi.util.OntologyAxiomPair;
 import org.semanticweb.owlapi.util.SimpleShortFormProvider;
 import org.semanticweb.owlapi.util.mansyntax.ManchesterOWLSyntaxParser;
-import sr.obep.programming.parser.delp.DELPParser;
+import sr.obep.programming.parser.delp.OBEPParser;
 import sr.obep.programming.parser.delp.OBEPParserOutput;
 import sr.obep.programming.parser.delp.data.ComplexEventDeclaration;
 import sr.obep.programming.parser.delp.data.CompositeEventDeclaration;
@@ -37,7 +37,7 @@ public class ParserTest {
 
         URL resource = ParserTest.class.getResource("/shapes.query");
 
-        DELPParser parser = Parboiled.createParser(DELPParser.class);
+        OBEPParser parser = Parboiled.createParser(OBEPParser.class);
 
         String program = getFile(resource.getPath());
 

@@ -11,7 +11,7 @@ import sr.obep.programming.parser.sparql.SPARQLParser;
 /**
  * Created by Riccardo on 09/08/16.
  */
-public class DELPParser extends SPARQLParser {
+public class OBEPParser extends SPARQLParser {
 
     @Override
     public Rule Query() {

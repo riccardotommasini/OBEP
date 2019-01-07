@@ -25,6 +25,7 @@ public class WritableEventStream implements EventStream {
         return name;
     }
 
+    @Override
     public void put(RawEvent e) {
         processors.forEach(eventProcessor -> eventProcessor.send(e));
     }

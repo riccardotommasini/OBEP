@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.model.parameters.OntologyCopy;
-import sr.obep.TestEventProcessor;
+import sr.obep.utils.TestEventProcessor;
 import sr.obep.pipeline.abstration.Abstracter;
 import sr.obep.pipeline.abstration.AbstracterImpl;
 import sr.obep.data.content.ContentOntology;

@@ -3,6 +3,7 @@ package sr.obep.programming.parser.delp.data;
 import openllet.owlapi.OWL;
 import org.apache.jena.query.QueryFactory;
 import org.semanticweb.owlapi.model.OWLClass;
+import sr.obep.data.events.RawEvent;
 import sr.obep.data.streams.EventStream;
 import sr.obep.pipeline.abstration.Abstracter;
 import sr.obep.pipeline.abstration.AbstracterImpl;
@@ -37,6 +38,11 @@ public class Main {
             @Override
             public String name() {
                 return null;
+            }
+
+            @Override
+            public void put(RawEvent e) {
+
             }
         };
 

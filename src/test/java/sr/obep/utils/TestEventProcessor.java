@@ -1,4 +1,4 @@
-package sr.obep;
+package sr.obep.utils;
 
 import lombok.AllArgsConstructor;
 import sr.obep.pipeline.processors.EventProcessor;

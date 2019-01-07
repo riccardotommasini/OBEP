@@ -1,4 +1,4 @@
-package sr.obep;
+package sr.obep.utils;
 
 import org.semanticweb.owlapi.formats.ManchesterSyntaxDocumentFormat;
 import org.semanticweb.owlapi.model.OWLOntology;

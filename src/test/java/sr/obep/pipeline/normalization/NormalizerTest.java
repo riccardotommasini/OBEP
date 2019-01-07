@@ -4,7 +4,7 @@ import junit.framework.TestCase;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
-import sr.obep.TestEventProcessor;
+import sr.obep.utils.TestEventProcessor;
 import sr.obep.data.content.ContentOntology;
 import sr.obep.data.events.RawEvent;
 import sr.obep.pipeline.explanation.Explainer;

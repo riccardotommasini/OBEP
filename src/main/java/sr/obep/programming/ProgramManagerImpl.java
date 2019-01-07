@@ -1,14 +1,12 @@
 package sr.obep.programming;
 
-import com.espertech.esper.client.soda.EPStatementObjectModel;
-import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.parboiled.Parboiled;
 import org.parboiled.errors.ParseError;
 import org.parboiled.parserunners.ReportingParseRunner;
 import org.parboiled.support.ParsingResult;
 import sr.obep.data.events.LogicalEvent;
-import sr.obep.programming.parser.delp.DELPParser;
+import sr.obep.programming.parser.delp.OBEPParser;
 import sr.obep.programming.parser.delp.data.LogicalEventDeclaration;
 import sr.obep.programming.parser.delp.data.CompositeEventDeclaration;
 import sr.obep.programming.parser.delp.data.ComplexEventDeclaration;
@@ -30,7 +28,7 @@ public class ProgramManagerImpl implements ProgramManager {
         Set<Prefix> prefixes = res.getPrefixes();
 
 
-        DELPParser parser = Parboiled.createParser(DELPParser.class);
+        OBEPParser parser = Parboiled.createParser(OBEPParser.class);
 
         ParsingResult<OBEPParserOutput> result = new ReportingParseRunner(parser.Query()).run(program);
 

@@ -1,4 +1,4 @@
-package sr.obep.examples;
+package examples;
 
 import org.apache.commons.io.IOUtils;
 import org.parboiled.Parboiled;
@@ -10,10 +10,12 @@ import org.semanticweb.owlapi.io.StringDocumentSource;
 import org.semanticweb.owlapi.model.*;
 import sr.obep.data.content.ContentAxioms;
 import sr.obep.data.events.RawEvent;
-import sr.obep.data.streams.WritableEventStream;
+import sr.obep.data.streams.EventStream;
+import sr.obep.engine.OBEPEngine;
 import sr.obep.engine.OBEPEngineImpl;
+import sr.obep.parser.ParserTest;
 import sr.obep.programming.Program;
-import sr.obep.programming.parser.delp.DELPParser;
+import sr.obep.programming.parser.delp.OBEPParser;
 import sr.obep.programming.parser.delp.OBEPParserOutput;
 
 import java.io.File;
@@ -22,34 +24,36 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Main {
+public class Shapes {
 
-    static OWLOntologyManager m = OWLManager.createOWLOntologyManager();
-    static OWLDataFactory df = m.getOWLDataFactory();
-    public static final IRI base = IRI.create("http://www.example.org/geometry#");
+    private static final OWLOntologyManager m = OWLManager.createOWLOntologyManager();
+    private static final OWLDataFactory df = m.getOWLDataFactory();
+    private static final IRI base = IRI.create("http://www.example.org/geometry#");
 
-    //Classes
-    static OWLClass Plane = df.getOWLClass(base + "Plane");
-    static OWLClass Square = df.getOWLClass(base + "Square");
-    static OWLClass Solid = df.getOWLClass(base + "Solid");
-    static OWLObjectProperty transforms = df.getOWLObjectProperty(base + "transforms");
-    static OWLObjectProperty rotates = df.getOWLObjectProperty(base + "rotates");
+    public static void main(String[] args) {
 
-    //Events
-    static OWLClass ObsFig2D = df.getOWLClass(base + "ObsFig2D");
-    static OWLClass ObsFig3D = df.getOWLClass(base + "ObsFig3D");
-    static OWLClass ObsFigTransform = df.getOWLClass(base + "ObsFigTransform");
+        URL query = ParserTest.class.getResource("/shapes.query");
 
-    public static void main(String[] args) throws OWLOntologyCreationException {
+        OBEPParser parser = Parboiled.createParser(OBEPParser.class);
 
-        WritableEventStream sin = new WritableEventStream("http://www.stream.org/stream1");
+        Program program = getProgram(parser, getFile(query.getPath()));
 
-        URL resource = ParserTest.class.getResource("/shapes.query");
+        OBEPEngine obepEngine = new OBEPEngineImpl(base);
 
-        DELPParser parser = Parboiled.createParser(DELPParser.class);
+        obepEngine.register(program);
 
-        String query = getFile(resource.getPath());
+        //runtime data
 
+        EventStream sin = program.getInputStreams().iterator().next();
+
+        send_event(sin, "square1", getAxioms1());
+        send_event(sin, "u1", getAxioms2());
+
+        System.out.println("<---------END--------->");
+
+    }
+
+    private static Program getProgram(OBEPParser parser, String query) {
         ParsingResult<OBEPParserOutput> result = new ReportingParseRunner(parser.Query()).run(query);
 
         if (result.hasErrors()) {
@@ -62,31 +66,15 @@ public class Main {
 
         //runtime engine and program
 
-        Program program = q.asProgram();
+        return q.asProgram();
+    }
 
-        program.getInputStreams().add(sin);
-
-        OBEPEngineImpl obepEngine = new OBEPEngineImpl(base);
-        obepEngine.register(program);
-
-
-        //runtime data
-        RawEvent event = new RawEvent(base + "square1");
-        event.setContent(new ContentAxioms(getAxioms1()));
+    private static void send_event(EventStream sin, String square1, Set<OWLAxiom> axioms1) {
+        RawEvent event = new RawEvent(base + square1);
+        event.setContent(new ContentAxioms(axioms1));
         event.setStream_uri("http://www.stream.org/stream1");
         event.setTimeStamp(System.currentTimeMillis());
-
         sin.put(event);
-
-        RawEvent event1 = new RawEvent(base + "u1");
-        event1.setContent(new ContentAxioms(getAxioms2()));
-        event1.setStream_uri("http://www.stream.org/stream1");
-        event1.setTimeStamp(System.currentTimeMillis());
-
-        sin.put(event1);
-        System.out.println("<---------END--------->");
-
-
     }
 
     private static OWLOntology loadOntologyFromString(String onto) throws OWLOntologyCreationException {
@@ -111,8 +99,7 @@ public class Main {
 
     public static Set<OWLAxiom> getAxioms1() {
 
-        //Event1: square1 a Square
-
+        OWLClass Square = df.getOWLClass(base + "Square");
         OWLNamedIndividual b = df.getOWLNamedIndividual(base + "square1");
         OWLClassAssertionAxiom baB = df.getOWLClassAssertionAxiom(Square, b);
 
@@ -124,6 +111,7 @@ public class Main {
 
     public static Set<OWLAxiom> getAxioms2() {
         //Event2: u1 rotates square1 D
+        OWLObjectProperty rotates = df.getOWLObjectProperty(base + "rotates");
 
         OWLNamedIndividual e = df.getOWLNamedIndividual(base + "u1");
         OWLNamedIndividual f = df.getOWLNamedIndividual(base + "square1");
