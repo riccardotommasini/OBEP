@@ -1,0 +1,239 @@
+@prefix : <https://www.datasemantic.in/CncOntology.owl> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <https://www.datasemantic.in/CncOntology.owl> .
+
+<https://www.datasemantic.in/CncOntology.owl> rdf:type owl:Ontology .
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  https://www.datasemantic.in/CncOntology.owl#observes
+:observes rdf:type owl:ObjectProperty ,
+                   owl:FunctionalProperty ;
+          rdfs:domain :Device ;
+          rdfs:range :ObservedProperty .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#perform
+:perform rdf:type owl:ObjectProperty ,
+                  owl:FunctionalProperty ;
+         rdfs:domain :EventController ;
+         rdfs:range :Action .
+
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  https://www.datasemantic.in/CncOntology.owl#hasID
+:hasID rdf:type owl:DatatypeProperty ,
+                owl:FunctionalProperty ;
+       rdfs:domain :Device ;
+       rdfs:range xsd:string .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#hasValue
+:hasValue rdf:type owl:DatatypeProperty ;
+          rdfs:domain :Event ;
+          rdfs:range xsd:double .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  https://www.datasemantic.in/CncOntology.owl#AbnormalEnergyConsumption
+:AbnormalEnergyConsumption rdf:type owl:Class ;
+                           owl:equivalentClass [ rdf:type owl:Class ;
+                                                 owl:unionOf ( :AbnormalEnergyConsumption
+                                                               :AbnormalSpindleSpeed
+                                                             )
+                                               ] ;
+                           rdfs:subClassOf :Event .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#AbnormalSpindleSpeed
+:AbnormalSpindleSpeed rdf:type owl:Class ;
+                      owl:equivalentClass [ owl:intersectionOf ( :SpindleSpeed
+                                                                 [ rdf:type owl:Restriction ;
+                                                                   owl:onProperty :hasValue ;
+                                                                   owl:minQualifiedCardinality "2001"^^xsd:nonNegativeInteger ;
+                                                                   owl:onDataRange xsd:double
+                                                                 ]
+                                                               ) ;
+                                            rdf:type owl:Class
+                                          ] ;
+                      rdfs:subClassOf :Event .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#AbnormalTemperatureEvent
+:AbnormalTemperatureEvent rdf:type owl:Class ;
+                          owl:equivalentClass [ owl:intersectionOf ( :Temperature
+                                                                     [ rdf:type owl:Restriction ;
+                                                                       owl:onProperty :hasValue ;
+                                                                       owl:minQualifiedCardinality "101"^^xsd:nonNegativeInteger ;
+                                                                       owl:onDataRange xsd:double
+                                                                     ]
+                                                                   ) ;
+                                                rdf:type owl:Class
+                                              ] ;
+                          rdfs:subClassOf :Event .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#Action
+:Action rdf:type owl:Class .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#AlarmNumber
+:AlarmNumber rdf:type owl:Class ;
+             rdfs:subClassOf :ObservedProperty .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#DecreaseTemperature
+:DecreaseTemperature rdf:type owl:Class ;
+                     rdfs:subClassOf :Action .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#Device
+:Device rdf:type owl:Class .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#EnergyConsumption
+:EnergyConsumption rdf:type owl:Class ;
+                   rdfs:subClassOf :ObservedProperty .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#Event
+:Event rdf:type owl:Class .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#EventController
+:EventController rdf:type owl:Class .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#ID
+:ID rdf:type owl:Class .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#IncreaseSpindleSpeed
+:IncreaseSpindleSpeed rdf:type owl:Class ;
+                      rdfs:subClassOf :Action .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#IncreaseTemperature
+:IncreaseTemperature rdf:type owl:Class ;
+                     rdfs:subClassOf :Action .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#NormalEnergyConsumption
+:NormalEnergyConsumption rdf:type owl:Class ;
+                         owl:equivalentClass [ owl:intersectionOf ( :NormalSpindleSpeed
+                                                                    :NormalTemperatureEvent
+                                                                  ) ;
+                                               rdf:type owl:Class
+                                             ] ;
+                         rdfs:subClassOf :Event .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#NormalSpindleSpeed
+:NormalSpindleSpeed rdf:type owl:Class ;
+                    owl:equivalentClass [ owl:intersectionOf ( :SpindleSpeed
+                                                               [ rdf:type owl:Restriction ;
+                                                                 owl:onProperty :hasValue ;
+                                                                 owl:maxQualifiedCardinality "2000"^^xsd:nonNegativeInteger ;
+                                                                 owl:onDataRange xsd:double
+                                                               ]
+                                                             ) ;
+                                          rdf:type owl:Class
+                                        ] ;
+                    rdfs:subClassOf :Event .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#NormalTemperatureEvent
+:NormalTemperatureEvent rdf:type owl:Class ;
+                        owl:equivalentClass [ owl:intersectionOf ( :Temperature
+                                                                   [ rdf:type owl:Restriction ;
+                                                                     owl:onProperty :hasValue ;
+                                                                     owl:maxQualifiedCardinality "100"^^xsd:nonNegativeInteger ;
+                                                                     owl:onDataRange xsd:double
+                                                                   ]
+                                                                 ) ;
+                                              rdf:type owl:Class
+                                            ] ;
+                        rdfs:subClassOf :Event .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#ObservedProperty
+:ObservedProperty rdf:type owl:Class .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#ReduceSpindleSpeed
+:ReduceSpindleSpeed rdf:type owl:Class ;
+                    rdfs:subClassOf :Action .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#ShutDownMachine
+:ShutDownMachine rdf:type owl:Class ;
+                 rdfs:subClassOf :Action .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#SourceTime
+:SourceTime rdf:type owl:Class ;
+            rdfs:subClassOf :ObservedProperty .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#SpindleSpeed
+:SpindleSpeed rdf:type owl:Class ;
+              rdfs:subClassOf :ObservedProperty .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#Temperature
+:Temperature rdf:type owl:Class ;
+             rdfs:subClassOf :ObservedProperty .
+
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  https://www.datasemantic.in/CncOntology.owl#DMX-CNC
+:DMX-CNC rdf:type owl:NamedIndividual ,
+                  :Device .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#Device_Id-1
+:Device_Id-1 rdf:type owl:NamedIndividual ,
+                      :ID .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#EventController-1
+:EventController-1 rdf:type owl:NamedIndividual ,
+                            :EventController .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#104
+: rdf:type owl:NamedIndividual ,
+           :AbnormalTemperatureEvent .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#1900
+: rdf:type owl:NamedIndividual ,
+           :NormalSpindleSpeed .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#2003
+: rdf:type owl:NamedIndividual ,
+           :AbnormalSpindleSpeed .
+
+
+###  https://www.datasemantic.in/CncOntology.owl#95
+: rdf:type owl:NamedIndividual ,
+           :NormalTemperatureEvent .
+
+
+###  Generated by the OWL API (version 4.2.8.20170104-2310) https://github.com/owlcs/owlapi

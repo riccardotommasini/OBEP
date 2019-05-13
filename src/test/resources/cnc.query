@@ -1,0 +1,24 @@
+PREFIX  cnc: <https://rdf.scania.com/CncOntology.owl#>
+PREFIX  owl: <http://www.w3.org/2002/07/owl#>
+PREFIX  rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX  xml: <http://www.w3.org/XML/1998/namespace>
+PREFIX  xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX  rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+VOCAB <src/test/resources/CncOntology.owl>
+FROM GRAPH <http://localhost:3030/graph>
+FROM STREAM <http://localhost:8112/stream>
+NAMED EVENT :ASS AS :AbnormalSpindleSpeed.
+NAMED EVENT :ATE AS :AbnormalTemperatureEvent.
+NAMED EVENT :AEC AS :AbnormalEnergyConsumption.
+NAMED EVENT :AEC {
+     MATCH every (:ASS or :ATE -> :AEC) WITHIN (5 m)
+      IF {
+             EVENT :ASS{ ?SpindleSpeed cnc:hasValue   ?value1 }
+             EVENT :ATE { ?Temperature cnc:hasValue ?value2  }
+             FILTER(?value1 >2000)
+             FILTER(?value2 >100)
+          }
+}
+RETURN :AEC AS RDF STREAM
+
