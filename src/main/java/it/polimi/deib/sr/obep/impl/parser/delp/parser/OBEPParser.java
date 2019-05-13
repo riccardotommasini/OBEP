@@ -128,6 +128,7 @@ public class OBEPParser extends SPARQLParser {
     }
 
 
+
     public Rule PatternExpression() {
         return Sequence(FollowedByExpression(), Optional(Sequence(WITHIN(), LPAR(), TimeConstrain(),
                 push(new PatternDeclaration(match(), (PatternDeclaration) pop())), RPAR())));

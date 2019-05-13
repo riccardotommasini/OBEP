@@ -50,6 +50,7 @@ public class LogicalEventDeclaration extends ComplexEventDeclaration {
 
     @Override
     public String toString() {
-        return ("Class: " + getHead() + " \n\t EquivalentTo: " + getDlbody().replace(":", "")).trim();
+        String replace = getDlbody().replace(":", "");
+        return ("Class: " + getHead() + " \n\t EquivalentTo: " + replace).trim();
     }
 }

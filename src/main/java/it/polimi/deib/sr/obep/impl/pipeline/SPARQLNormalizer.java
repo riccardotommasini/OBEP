@@ -56,7 +56,6 @@ public class SPARQLNormalizer implements Normalizer {
             resultItem.forEach(copy::put);
             copy.setContext(context);
             next.send(copy);
-
         });
     }
 

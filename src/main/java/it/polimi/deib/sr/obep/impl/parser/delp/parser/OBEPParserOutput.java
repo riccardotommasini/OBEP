@@ -212,7 +212,7 @@ public class OBEPParserOutput extends SPARQLQuery implements ProgramDeclaration 
             mparser.setDefaultOntology(dbox);
 
             //Parse each of the axioms in the logical events declarations
-            logicalEvents.stream().map(LogicalEventDeclaration::toString).forEach(System.out::println);
+ //           logicalEvents.stream().map(LogicalEventDeclaration::toString).forEach(System.out::println);
             logicalEvents.stream().map(LogicalEventDeclaration::toString)
                     .flatMap(s -> {
                         mparser.setStringToParse(s);

@@ -1,7 +1,7 @@
 package it.polimi.deib.sr.obep.impl.pipeline;
 
 import it.polimi.deib.sr.obep.core.data.events.Content;
-import lombok.RequiredArgsConstructor;
+import it.polimi.deib.sr.obep.core.pipeline.normalization.NormalForm;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.query.*;
@@ -15,13 +15,11 @@ import org.apache.jena.reasoner.ReasonerRegistry;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
-import it.polimi.deib.sr.obep.core.pipeline.normalization.NormalForm;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.*;
 
-@RequiredArgsConstructor
 public class SPARQLNormalForm implements NormalForm {
 
     private final String context;
@@ -30,12 +28,17 @@ public class SPARQLNormalForm implements NormalForm {
 
     private OWLOntology tbox;
     private OntModel tboxrdf;
-    Reasoner reasoner = ReasonerRegistry.getOWLMiniReasoner();
+    private Reasoner reasoner;
 
     public SPARQLNormalForm(String ctx, String q, OWLClass c) {
-        this.query = QueryFactory.create(q);
-        this.type = c;
-        this.context = ctx;
+        this(ctx, QueryFactory.create(q), c);
+    }
+
+    public SPARQLNormalForm(String context, Query query, OWLClass type) {
+        this.context = context;
+        this.query = query;
+        this.type = type;
+        this.reasoner = ReasonerRegistry.getOWLMiniReasoner();
     }
 
     @Override
@@ -56,7 +59,6 @@ public class SPARQLNormalForm implements NormalForm {
 
     @Override
     public List<Map<String, Object>> apply(Content abox) {
-        reasoner = reasoner.bindSchema(tboxrdf);
         try {
             OntModel converted_abox = convert(abox.asOWLOntology());
             InfGraph bind = reasoner.bind(converted_abox.getGraph());
@@ -74,6 +76,7 @@ public class SPARQLNormalForm implements NormalForm {
         this.tbox = tbox;
         try {
             this.tboxrdf = convert(tbox);
+            this.reasoner = reasoner.bindSchema(this.tboxrdf);
         } catch (OWLOntologyStorageException e) {
             e.printStackTrace();
         }

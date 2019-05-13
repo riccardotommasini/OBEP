@@ -1,0 +1,186 @@
+Prefix: : <https://www.datasemantic.in/CncOntology.owl#>
+Prefix: dc: <http://purl.org/dc/elements/1.1/>
+Prefix: owl: <http://www.w3.org/2002/07/owl#>
+Prefix: rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+Prefix: rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+Prefix: xml: <http://www.w3.org/XML/1998/namespace>
+Prefix: xsd: <http://www.w3.org/2001/XMLSchema#>
+
+
+
+Ontology: <https://www.datasemantic.in/CncOntology.owl>
+
+
+Datatype: SpindleSpeedRange
+
+    EquivalentTo: 
+        xsd:double[>= "0.0"^^xsd:double , <= "5000.0"^^xsd:double]
+    
+    
+Datatype: highSpeedRange
+
+    EquivalentTo: 
+        (speedRange and xsd:double[>= "2001.0"^^xsd:double])
+    
+    
+Datatype: highTemperature
+
+    EquivalentTo: 
+        (temperatureRange and xsd:double[>= "101.0"^^xsd:double])
+    
+    
+Datatype: speedRange
+
+    EquivalentTo: 
+        xsd:double[>= "0.0"^^xsd:double , <= "5000.0"^^xsd:double]
+    
+    
+Datatype: temperatureRange
+
+    EquivalentTo: 
+        xsd:double[>= "-273.15"^^xsd:double , <= "10000.0"^^xsd:double]
+    
+    
+Datatype: xsd:double
+
+    
+Datatype: xsd:string
+
+    
+ObjectProperty: observes
+
+    Characteristics: 
+        Functional
+    
+    Domain: 
+        Device
+    
+    Range: 
+        ObservedProperty
+    
+    
+ObjectProperty: perform
+
+    Characteristics: 
+        Functional
+    
+    Domain: 
+        EventController
+    
+    Range: 
+        Action
+    
+    
+DataProperty: hasID
+
+    Characteristics: 
+        Functional
+    
+    Domain: 
+        Device
+    
+    Range: 
+        xsd:string
+    
+    
+DataProperty: hasValue
+
+    Range: 
+        xsd:double
+    
+    
+Class: Action
+
+    
+Class: AlarmNumber
+
+    SubClassOf: 
+        ObservedProperty
+    
+    
+Class: DecreaseTemperature
+
+    SubClassOf: 
+        Action
+    
+    
+Class: Device
+
+    
+Class: EnergyConsumption
+
+    SubClassOf: 
+        ObservedProperty
+    
+    
+Class: EventController
+
+    
+Class: ID
+
+    
+Class: IncreaseSpindleSpeed
+
+    SubClassOf: 
+        Action
+    
+    
+Class: IncreaseTemperature
+
+    SubClassOf: 
+        Action
+    
+    
+Class: NormalEnergyConsumption
+
+    SubClassOf: 
+        EnergyConsumption
+    
+    
+Class: NormalSpindleSpeed
+
+    EquivalentTo: 
+        SpindleSpeed
+         and (hasValue some SpindleSpeedRange)
+    
+    
+Class: NormalTemperature
+
+    EquivalentTo: 
+        Temperature
+         and (hasValue some temperatureRange)
+    
+    
+Class: ObservedProperty
+
+    
+Class: ReduceSpindleSpeed
+
+    SubClassOf: 
+        Action
+    
+    
+Class: ShutDownMachine
+
+    SubClassOf: 
+        Action
+    
+    
+Class: SourceTime
+
+    SubClassOf: 
+        ObservedProperty
+    
+    
+Class: SpindleSpeed
+
+    SubClassOf: 
+        ObservedProperty
+    
+    
+Class: Temperature
+
+    SubClassOf: 
+        ObservedProperty
+    
+    

@@ -1,3 +1,6 @@
+.DS_Store
+catalog-v001.xml
+
 *.class
 
 # Mobile Tools for Java (J2ME)

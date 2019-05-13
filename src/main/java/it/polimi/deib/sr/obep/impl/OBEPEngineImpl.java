@@ -1,24 +1,25 @@
 package it.polimi.deib.sr.obep.impl;
 
+import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.soda.*;
-import it.polimi.deib.sr.obep.impl.pipeline.AbstracterImpl;
+import it.polimi.deib.sr.obep.core.OBEPEngine;
 import it.polimi.deib.sr.obep.core.pipeline.abstration.Abstracter;
-import it.polimi.deib.sr.obep.core.pipeline.explanation.Explainer;
+import it.polimi.deib.sr.obep.core.pipeline.normalization.NormalForm;
 import it.polimi.deib.sr.obep.core.pipeline.normalization.Normalizer;
 import it.polimi.deib.sr.obep.core.programming.Program;
+import it.polimi.deib.sr.obep.core.programming.ProgramExecution;
+import it.polimi.deib.sr.obep.core.programming.ProgramExecutionImpl;
 import it.polimi.deib.sr.obep.core.programming.ProgramManager;
+import it.polimi.deib.sr.obep.impl.content.MergeContentExpression;
+import it.polimi.deib.sr.obep.impl.pipeline.AbstracterImpl;
+import it.polimi.deib.sr.obep.impl.pipeline.CEP;
+import it.polimi.deib.sr.obep.impl.pipeline.SPARQLNormalizer;
+import it.polimi.deib.sr.obep.impl.programming.ProgramManagerImpl;
 import lombok.extern.log4j.Log4j;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.manchestersyntax.parser.ManchesterOWLSyntaxParserImpl;
 import org.semanticweb.owlapi.model.*;
-import it.polimi.deib.sr.obep.impl.content.MergeContentExpression;
-import it.polimi.deib.sr.obep.core.OBEPEngine;
-import it.polimi.deib.sr.obep.impl.pipeline.ExplainerImpl;
-import it.polimi.deib.sr.obep.core.pipeline.normalization.NormalForm;
-import it.polimi.deib.sr.obep.impl.pipeline.SPARQLNormalizer;
-import it.polimi.deib.sr.obep.impl.pipeline.CEP;
-import it.polimi.deib.sr.obep.impl.programming.ProgramManagerImpl;
 
 import java.util.*;
 
@@ -37,7 +38,7 @@ public class OBEPEngineImpl implements OBEPEngine {
     }
 
     @Override
-    public void register(Program q) {
+    public ProgramExecutionImpl register(Program q) {
         try {
 
             OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -133,37 +134,31 @@ public class OBEPEngineImpl implements OBEPEngine {
 
             //Setting Up the Engine
 
-
             Abstracter abstracter = new AbstracterImpl(ebox);
 
-            Explainer explainer = new ExplainerImpl(ebox);
+            //  Explainer explainer = new ExplainerImpl(ebox);
 
-            normalizers.forEach(normalizer -> abstracter.pipe(explainer).pipe(normalizer).pipe(cep));
+            normalizers.forEach(normalizer -> abstracter//.pipe(explainer)
+                    .pipe(normalizer).pipe(cep));
 
             //CONNECT INPUT AND OUTPUTS STREAMS
             q.getInputStreams().forEach(s -> s.connectTo(abstracter));
 
             q.getOutputStreams().forEach(s -> cep.register_event_pattern_stream(connectToOut(epl_out_program_builder, s, new String[]{})));
 
-            cep.register_event_pattern_stream(out_pattern).addListener((newEvents, oldEvents, statement, epServiceProvider) -> {
-                if (newEvents != null) {
-                    Arrays.stream(newEvents)
-                            .map(EventBean::getUnderlying)
-                            .map(o -> (Map) o)
-                            .flatMap(map -> map.values().stream())
-                            .forEach(System.out::println);
-                }
-            });
+            EPStatement epStatement = cep.register_event_pattern_stream(out_pattern);
+
 
             System.out.println(epl_program_builder.toString());
             StringJoiner add = epl_out_program_builder.add(out_pattern);
             System.out.println(add.toString());
 
+            return new ProgramExecutionImpl(cep, abstracter, normalizers, epStatement);
 
         } catch (OWLOntologyCreationException e) {
             e.printStackTrace();
+            return null;
         }
-
     }
 
     private String connectTo(StringJoiner output_stream_builder, String udf, String head, String stream, String[] projections) {
@@ -192,8 +187,8 @@ public class OBEPEngineImpl implements OBEPEngine {
     }
 
     @Override
-    public void register(String q) {
-        register(manager.parse(q));
+    public ProgramExecution register(String q) {
+        return register(manager.parse(q));
     }
 
 //    public void sendEvent(RawEvent se) {
