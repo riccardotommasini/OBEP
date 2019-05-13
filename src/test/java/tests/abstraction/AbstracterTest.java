@@ -1,17 +1,17 @@
 package tests.abstraction;
 
+import it.polimi.deib.sr.obep.core.pipeline.abstration.Abstracter;
+import it.polimi.deib.sr.obep.core.pipeline.processors.EventProcessor;
+import it.polimi.deib.sr.obep.impl.RawEvent;
+import it.polimi.deib.sr.obep.impl.content.ContentOntology;
+import it.polimi.deib.sr.obep.impl.pipeline.AbstracterImpl;
 import junit.framework.TestCase;
 import openllet.owlapi.OWL;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.model.parameters.OntologyCopy;
-import it.polimi.deib.sr.obep.core.pipeline.abstration.Abstracter;
-import it.polimi.deib.sr.obep.core.pipeline.processors.EventProcessor;
 import tests.utils.TestEventProcessor;
-import it.polimi.deib.sr.obep.impl.RawEvent;
-import it.polimi.deib.sr.obep.impl.content.ContentOntology;
-import it.polimi.deib.sr.obep.impl.pipeline.AbstracterImpl;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -48,23 +48,28 @@ public class AbstracterTest extends TestCase {
         Set<OWLAxiom> axioms = new HashSet<>();
 
         OWLNamedIndividual b = factory.getOWLNamedIndividual(base + "b");
-        OWLNamedIndividual event = factory.getOWLNamedIndividual(base + "a");
-        axioms.add(factory.getOWLObjectPropertyAssertionAxiom(p, event, b));
+        OWLNamedIndividual a = factory.getOWLNamedIndividual(base + "a");
         axioms.add(factory.getOWLClassAssertionAxiom(B, b));
+        axioms.add(factory.getOWLObjectPropertyAssertionAxiom(p, a, b));
 
-        Set<OWLClass> types = abstracter.lift(o, event);
+
+        OWLOntologyManager manager2 = OWLManager.createOWLOntologyManager();
+
+        OWLOntology copy = manager2.copyOntology(o, OntologyCopy.SHALLOW);
+        copy.add(axioms);
+
+        Set<OWLClass> types = abstracter.lift(copy, a);
 
         Set<OWLClass> expected_types = new HashSet<>();
         expected_types.add(A);
-        expected_types.add(OWL.Thing);
 
-        assertEquals(types.size(), 2);
+        assertEquals(expected_types.size(), types.size());
         assertTrue(types.containsAll(expected_types));
 
     }
 
     @Test
-    public static void test2() throws OWLOntologyCreationException {
+    public void test2() throws OWLOntologyCreationException {
 
         IRI base = IRI.create("http://example.org#");
 
@@ -117,7 +122,6 @@ public class AbstracterTest extends TestCase {
 
         final Set<RawEvent> expected_events = new HashSet<>();
         expected_events.add(eventA);
-        expected_events.add(thing);
 
         final List<RawEvent> actual_events = new ArrayList<>();
 
@@ -142,15 +146,13 @@ public class AbstracterTest extends TestCase {
 
         assertEquals(expected_events.size(), actual_events.size());
         actual_events.forEach(semanticEvent -> {
-            assertTrue(semanticEvent.containsKey("timestamp.abstracter"));
+            assertTrue(semanticEvent.containsKey("timestamp_abstracter"));
             assertTrue(semanticEvent.containsKey("event_type"));
-            assertTrue(semanticEvent.get("event_type") != null);
+            assertNotNull(semanticEvent.get("event_type"));
         });
 
-        assertEquals(OWL.Thing,
-                actual_events.get(0).getType());
         assertEquals(A,
-                actual_events.get(1).getType());
+                actual_events.get(0).getType());
 
     }
 }

@@ -70,7 +70,7 @@ public class NormalizerTest extends TestCase {
     }
 
     @Test
-    public static void test2() throws OWLOntologyCreationException {
+    public void test2() throws OWLOntologyCreationException {
 
         IRI base = IRI.create("http://example.org#");
 
@@ -151,7 +151,7 @@ public class NormalizerTest extends TestCase {
 
         RawEvent rawEvent = actual_events.get(0);
 
-        assertTrue(rawEvent.containsKey("timestamp.explainer"));
+        assertTrue(rawEvent.containsKey("timestamp_explainer"));
         assertTrue(rawEvent.containsKey("event_type"));
         assertTrue(rawEvent.get("event_type") != null);
         assertTrue(expected_explanation.containsAll(rawEvent.getContent().asOWLAxioms()));

@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>it.polimi.sr.obep</groupId>
-    <artifactId>obep</artifactId>
+    <artifactId>obeps</artifactId>
     <version>1.0</version>
     <build>
         <plugins>
@@ -19,7 +19,6 @@
             </plugin>
         </plugins>
     </build>
-
 
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.apache.jena/jena-arq -->
