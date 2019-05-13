@@ -1,24 +1,28 @@
-PREFIX  cnc: <https://rdf.scania.com/CncOntology.owl#>
+PREFIX  : <https://www.datasemantic.in/CncOntology.owl#>
 PREFIX  owl: <http://www.w3.org/2002/07/owl#>
 PREFIX  rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX  xml: <http://www.w3.org/XML/1998/namespace>
 PREFIX  xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX  rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-VOCAB <src/test/resources/CncOntology.owl>
-FROM GRAPH <http://localhost:3030/graph>
-FROM STREAM <http://localhost:8112/stream>
-NAMED EVENT :ASS AS :AbnormalSpindleSpeed.
-NAMED EVENT :ATE AS :AbnormalTemperatureEvent.
-NAMED EVENT :AEC AS :AbnormalEnergyConsumption.
-NAMED EVENT :AEC {
-     MATCH every (:ASS or :ATE -> :AEC) WITHIN (5 m)
+VOCAB </Users/riccardo/_Projects/delp/src/test/resources/CncOntology.owl>
+
+FROM GRAPH <http://www.static.org>
+
+FROM STREAM <http://localhost:8112/stream1>
+
+NAMED EVENT :AbnormalSpindleSpeed AS :SpindleSpeed and (:hasValue some :highSpeedRange)
+
+
+NAMED EVENT :AbnormalTemperature AS :Temperature and (:hasValue some :highTemperature)
+
+NAMED EVENT :AbnormalEnergyConsumption {
+     MATCH every (:AbnormalTemperature -> :AbnormalSpindleSpeed) WITHIN (5 m)
       IF {
-             EVENT :ASS{ ?SpindleSpeed cnc:hasValue   ?value1 }
-             EVENT :ATE { ?Temperature cnc:hasValue ?value2  }
-             FILTER(?value1 >2000)
-             FILTER(?value2 >100)
+             EVENT :AbnormalTemperature { ?o :observes ?e1  }
+             EVENT :AbnormalSpindleSpeed { ?o :observes ?e2 }
           }
 }
-RETURN :AEC AS RDF STREAM
+
+RETURN :AbnormalEnergyConsumption AS RDF STREAM
 

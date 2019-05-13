@@ -1,4 +1,5 @@
-Prefix: : <https://www.datasemantic.in/CncOntology.owl>
+Prefix: : <https://www.datasemantic.in/CncOntology.owl#>
+Prefix: dc: <http://purl.org/dc/elements/1.1/>
 Prefix: owl: <http://www.w3.org/2002/07/owl#>
 Prefix: rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 Prefix: rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -10,233 +11,176 @@ Prefix: xsd: <http://www.w3.org/2001/XMLSchema#>
 Ontology: <https://www.datasemantic.in/CncOntology.owl>
 
 
+Datatype: SpindleSpeedRange
+
+    EquivalentTo: 
+        xsd:double[>= "0.0"^^xsd:double , <= "5000.0"^^xsd:double]
+    
+    
+Datatype: highSpeedRange
+
+    EquivalentTo: 
+        (speedRange and xsd:double[>= "2001.0"^^xsd:double])
+    
+    
+Datatype: highTemperature
+
+    EquivalentTo: 
+        (temperatureRange and xsd:double[>= "101.0"^^xsd:double])
+    
+    
+Datatype: speedRange
+
+    EquivalentTo: 
+        xsd:double[>= "0.0"^^xsd:double , <= "5000.0"^^xsd:double]
+    
+    
+Datatype: temperatureRange
+
+    EquivalentTo: 
+        xsd:double[>= "-273.15"^^xsd:double , <= "10000.0"^^xsd:double]
+    
+    
 Datatype: xsd:double
 
     
 Datatype: xsd:string
 
     
-ObjectProperty: <https://www.datasemantic.in/CncOntology.owl#observes>
+ObjectProperty: observes
 
     Characteristics: 
         Functional
     
     Domain: 
-        <https://www.datasemantic.in/CncOntology.owl#Device>
+        Device
     
     Range: 
-        <https://www.datasemantic.in/CncOntology.owl#ObservedProperty>
+        ObservedProperty
     
     
-ObjectProperty: <https://www.datasemantic.in/CncOntology.owl#perform>
+ObjectProperty: perform
 
     Characteristics: 
         Functional
     
     Domain: 
-        <https://www.datasemantic.in/CncOntology.owl#EventController>
+        EventController
     
     Range: 
-        <https://www.datasemantic.in/CncOntology.owl#Action>
+        Action
     
     
-DataProperty: <https://www.datasemantic.in/CncOntology.owl#hasID>
+DataProperty: hasID
 
     Characteristics: 
         Functional
     
     Domain: 
-        <https://www.datasemantic.in/CncOntology.owl#Device>
+        Device
     
     Range: 
         xsd:string
     
     
-DataProperty: <https://www.datasemantic.in/CncOntology.owl#hasValue>
+DataProperty: hasValue
 
-    Domain: 
-        <https://www.datasemantic.in/CncOntology.owl#Event>
-    
     Range: 
         xsd:double
     
     
-Class: <https://www.datasemantic.in/CncOntology.owl#AbnormalEnergyConsumption>
+Class: Action
+
+    
+Class: AlarmNumber
+
+    SubClassOf: 
+        ObservedProperty
+    
+    
+Class: DecreaseTemperature
+
+    SubClassOf: 
+        Action
+    
+    
+Class: Device
+
+    
+Class: EnergyConsumption
+
+    SubClassOf: 
+        ObservedProperty
+    
+    
+Class: EventController
+
+    
+Class: ID
+
+    
+Class: IncreaseSpindleSpeed
+
+    SubClassOf: 
+        Action
+    
+    
+Class: IncreaseTemperature
+
+    SubClassOf: 
+        Action
+    
+    
+Class: NormalEnergyConsumption
+
+    SubClassOf: 
+        EnergyConsumption
+    
+    
+Class: NormalSpindleSpeed
 
     EquivalentTo: 
-        <https://www.datasemantic.in/CncOntology.owl#AbnormalSpindleSpeed> or <https://www.datasemantic.in/CncOntology.owl#AbnormalTemperatureEvent>
-    
-    SubClassOf: 
-        <https://www.datasemantic.in/CncOntology.owl#Event>
+        SpindleSpeed
+         and (hasValue some SpindleSpeedRange)
     
     
-Class: <https://www.datasemantic.in/CncOntology.owl#AbnormalSpindleSpeed>
+Class: NormalTemperature
 
     EquivalentTo: 
-        <https://www.datasemantic.in/CncOntology.owl#SpindleSpeed>
-         and (<https://www.datasemantic.in/CncOntology.owl#hasValue> min 2001 xsd:double)
-    
-    SubClassOf: 
-        <https://www.datasemantic.in/CncOntology.owl#Event>
+        Temperature
+         and (hasValue some temperatureRange)
     
     
-Class: <https://www.datasemantic.in/CncOntology.owl#AbnormalTemperatureEvent>
-
-    EquivalentTo: 
-        <https://www.datasemantic.in/CncOntology.owl#Temperature>
-         and (<https://www.datasemantic.in/CncOntology.owl#hasValue> min 101 xsd:double)
-    
-    SubClassOf: 
-        <https://www.datasemantic.in/CncOntology.owl#Event>
-    
-    
-Class: <https://www.datasemantic.in/CncOntology.owl#Action>
+Class: ObservedProperty
 
     
-Class: <https://www.datasemantic.in/CncOntology.owl#AlarmNumber>
+Class: ReduceSpindleSpeed
 
     SubClassOf: 
-        <https://www.datasemantic.in/CncOntology.owl#ObservedProperty>
+        Action
     
     
-Class: <https://www.datasemantic.in/CncOntology.owl#DecreaseTemperature>
+Class: ShutDownMachine
 
     SubClassOf: 
-        <https://www.datasemantic.in/CncOntology.owl#Action>
+        Action
     
     
-Class: <https://www.datasemantic.in/CncOntology.owl#Device>
-
-    
-Class: <https://www.datasemantic.in/CncOntology.owl#EnergyConsumption>
+Class: SourceTime
 
     SubClassOf: 
-        <https://www.datasemantic.in/CncOntology.owl#ObservedProperty>
+        ObservedProperty
     
     
-Class: <https://www.datasemantic.in/CncOntology.owl#Event>
-
-    
-Class: <https://www.datasemantic.in/CncOntology.owl#EventController>
-
-    
-Class: <https://www.datasemantic.in/CncOntology.owl#ID>
-
-    
-Class: <https://www.datasemantic.in/CncOntology.owl#IncreaseSpindleSpeed>
+Class: SpindleSpeed
 
     SubClassOf: 
-        <https://www.datasemantic.in/CncOntology.owl#Action>
+        ObservedProperty
     
     
-Class: <https://www.datasemantic.in/CncOntology.owl#IncreaseTemperature>
+Class: Temperature
 
     SubClassOf: 
-        <https://www.datasemantic.in/CncOntology.owl#Action>
-    
-    
-Class: <https://www.datasemantic.in/CncOntology.owl#NormalEnergyConsumption>
-
-    EquivalentTo: 
-        <https://www.datasemantic.in/CncOntology.owl#NormalSpindleSpeed>
-         and <https://www.datasemantic.in/CncOntology.owl#NormalTemperatureEvent>
-    
-    SubClassOf: 
-        <https://www.datasemantic.in/CncOntology.owl#Event>
-    
-    
-Class: <https://www.datasemantic.in/CncOntology.owl#NormalSpindleSpeed>
-
-    EquivalentTo: 
-        <https://www.datasemantic.in/CncOntology.owl#SpindleSpeed>
-         and (<https://www.datasemantic.in/CncOntology.owl#hasValue> max 2000 xsd:double)
-    
-    SubClassOf: 
-        <https://www.datasemantic.in/CncOntology.owl#Event>
-    
-    
-Class: <https://www.datasemantic.in/CncOntology.owl#NormalTemperatureEvent>
-
-    EquivalentTo: 
-        <https://www.datasemantic.in/CncOntology.owl#Temperature>
-         and (<https://www.datasemantic.in/CncOntology.owl#hasValue> max 100 xsd:double)
-    
-    SubClassOf: 
-        <https://www.datasemantic.in/CncOntology.owl#Event>
-    
-    
-Class: <https://www.datasemantic.in/CncOntology.owl#ObservedProperty>
-
-    
-Class: <https://www.datasemantic.in/CncOntology.owl#ReduceSpindleSpeed>
-
-    SubClassOf: 
-        <https://www.datasemantic.in/CncOntology.owl#Action>
-    
-    
-Class: <https://www.datasemantic.in/CncOntology.owl#ShutDownMachine>
-
-    SubClassOf: 
-        <https://www.datasemantic.in/CncOntology.owl#Action>
-    
-    
-Class: <https://www.datasemantic.in/CncOntology.owl#SourceTime>
-
-    SubClassOf: 
-        <https://www.datasemantic.in/CncOntology.owl#ObservedProperty>
-    
-    
-Class: <https://www.datasemantic.in/CncOntology.owl#SpindleSpeed>
-
-    SubClassOf: 
-        <https://www.datasemantic.in/CncOntology.owl#ObservedProperty>
-    
-    
-Class: <https://www.datasemantic.in/CncOntology.owl#Temperature>
-
-    SubClassOf: 
-        <https://www.datasemantic.in/CncOntology.owl#ObservedProperty>
-    
-    
-Individual: <https://www.datasemantic.in/CncOntology.owl#104>
-
-    Types: 
-        <https://www.datasemantic.in/CncOntology.owl#AbnormalTemperatureEvent>
-    
-    
-Individual: <https://www.datasemantic.in/CncOntology.owl#1900>
-
-    Types: 
-        <https://www.datasemantic.in/CncOntology.owl#NormalSpindleSpeed>
-    
-    
-Individual: <https://www.datasemantic.in/CncOntology.owl#2003>
-
-    Types: 
-        <https://www.datasemantic.in/CncOntology.owl#AbnormalSpindleSpeed>
-    
-    
-Individual: <https://www.datasemantic.in/CncOntology.owl#95>
-
-    Types: 
-        <https://www.datasemantic.in/CncOntology.owl#NormalTemperatureEvent>
-    
-    
-Individual: <https://www.datasemantic.in/CncOntology.owl#DMX-CNC>
-
-    Types: 
-        <https://www.datasemantic.in/CncOntology.owl#Device>
-    
-    
-Individual: <https://www.datasemantic.in/CncOntology.owl#Device_Id-1>
-
-    Types: 
-        <https://www.datasemantic.in/CncOntology.owl#ID>
-    
-    
-Individual: <https://www.datasemantic.in/CncOntology.owl#EventController-1>
-
-    Types: 
-        <https://www.datasemantic.in/CncOntology.owl#EventController>
+        ObservedProperty
     
     

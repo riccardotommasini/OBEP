@@ -1,6 +1,13 @@
 package examples;
 
+import com.espertech.esper.client.EPServiceProvider;
+import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.EventBean;
+import it.polimi.deib.sr.obep.core.programming.ProgramExecution;
+import it.polimi.deib.sr.obep.core.programming.ProgramExecutionImpl;
+import it.polimi.deib.sr.obep.core.programming.ResultFormatter;
 import org.apache.commons.io.IOUtils;
+import org.apache.jena.riot.system.IRIResolver;
 import org.parboiled.Parboiled;
 import org.parboiled.errors.ParseError;
 import org.parboiled.parserunners.ReportingParseRunner;
@@ -21,8 +28,7 @@ import it.polimi.deib.sr.obep.impl.parser.delp.parser.OBEPParserOutput;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class Shapes {
 
@@ -34,20 +40,41 @@ public class Shapes {
 
         URL query = ParserTest.class.getResource("/shapes.query");
 
+        System.out.println(query.getPath());
         OBEPParser parser = Parboiled.createParser(OBEPParser.class);
+        parser.setResolver(IRIResolver.create(base.getIRIString()));
 
         Program program = getProgram(parser, getFile(query.getPath()));
 
         OBEPEngine obepEngine = new OBEPEngineImpl(base);
 
-        obepEngine.register(program);
+        ProgramExecution exe = obepEngine.register(program);
 
+        exe.add(new ResultFormatter() {
+            @Override
+            public void update(EventBean[] newEvents, EventBean[] oldEvents, EPStatement statement, EPServiceProvider epServiceProvider) {
+                Arrays.stream(newEvents)
+                        .map(EventBean::getUnderlying)
+                        .map(o -> (Map) o)
+                        .flatMap(map -> map.values().stream())
+                        .forEach(System.out::println);
+            }
+
+            @Override
+            public void update(Observable o, Object arg) {
+
+            }
+        });
         //runtime parser
 
+        //TODO events may come from different streams, but at this point we don't care
+        //OBEP is single stream in the logic. However, this might be an advantage in the sense
+        //that it can be used for handling partitions
         EventStream sin = program.getInputStreams().iterator().next();
 
         send_event(sin, "square1", getAxioms1());
         send_event(sin, "u1", getAxioms2());
+
 
         System.out.println("<---------END--------->");
 

@@ -1,9 +1,7 @@
 PREFIX : <http://www.example.org/geometry#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
-VOCAB </Users/rictomm/_Projects/Semantic/StreamReasoning/SR/delp/src/test/resources/geometry.owl>
-
-FROM GRAPH <http://www.static.org>
+VOCAB </Users/riccardo/_Projects/delp/src/test/resources/geometry.owl>
 
 FROM STREAM <http://www.stream.org/shapestream>
 

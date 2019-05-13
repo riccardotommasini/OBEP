@@ -1,6 +1,15 @@
 package examples;
 
+import it.polimi.deib.sr.obep.core.OBEPEngine;
+import it.polimi.deib.sr.obep.core.data.streams.EventStream;
+import it.polimi.deib.sr.obep.core.programming.Program;
+import it.polimi.deib.sr.obep.impl.OBEPEngineImpl;
+import it.polimi.deib.sr.obep.impl.RawEvent;
+import it.polimi.deib.sr.obep.impl.content.ContentAxioms;
+import it.polimi.deib.sr.obep.impl.parser.delp.parser.OBEPParser;
+import it.polimi.deib.sr.obep.impl.parser.delp.parser.OBEPParserOutput;
 import org.apache.commons.io.IOUtils;
+import org.apache.jena.riot.system.IRIResolver;
 import org.parboiled.Parboiled;
 import org.parboiled.errors.ParseError;
 import org.parboiled.parserunners.ReportingParseRunner;
@@ -8,15 +17,7 @@ import org.parboiled.support.ParsingResult;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.StringDocumentSource;
 import org.semanticweb.owlapi.model.*;
-import it.polimi.deib.sr.obep.impl.content.ContentAxioms;
-import it.polimi.deib.sr.obep.impl.RawEvent;
-import it.polimi.deib.sr.obep.core.data.streams.EventStream;
-import it.polimi.deib.sr.obep.core.OBEPEngine;
-import it.polimi.deib.sr.obep.impl.OBEPEngineImpl;
-import tests.parser.ParserTest;
-import it.polimi.deib.sr.obep.core.programming.Program;
-import it.polimi.deib.sr.obep.impl.parser.delp.parser.OBEPParser;
-import it.polimi.deib.sr.obep.impl.parser.delp.parser.OBEPParserOutput;
+import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,21 +25,31 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Shapes {
+public class CNC {
 
     private static final OWLOntologyManager m = OWLManager.createOWLOntologyManager();
     private static final OWLDataFactory df = m.getOWLDataFactory();
-    private static final IRI base = IRI.create("http://www.example.org/geometry#");
+    private static final IRI base = IRI.create("https://www.datasemantic.in/CncOntology.owl#");
+    private static final IRI cnc = IRI.create("https://www.datasemantic.in/CncOntology.owl#");
+
+    static OWLClass Device = df.getOWLClass(cnc + "Device");
+    static OWLDataProperty receivedTime = df.getOWLDataProperty(cnc + "receivedTime");
+    static OWLObjectProperty observerdProperty = df.getOWLObjectProperty(cnc + "ObservedProperty");
+    static OWLObjectProperty observes = df.getOWLObjectProperty(cnc + "observes");
+    static OWLObjectProperty hasContext = df.getOWLObjectProperty(cnc + "hasContext");
+    static OWLDataProperty value = df.getOWLDataProperty(cnc + "hasValue");
 
     public static void main(String[] args) {
 
-        URL query = ParserTest.class.getResource("/shapes.query");
+        URL query = CNC.class.getResource("/cnc.query");
 
+        System.out.println(query.getPath());
         OBEPParser parser = Parboiled.createParser(OBEPParser.class);
 
+        parser.setResolver(IRIResolver.create(cnc.getIRIString()));
         Program program = getProgram(parser, getFile(query.getPath()));
 
-        OBEPEngine obepEngine = new OBEPEngineImpl(base);
+        OBEPEngine obepEngine = new OBEPEngineImpl(cnc);
 
         obepEngine.register(program);
 
@@ -46,8 +57,15 @@ public class Shapes {
 
         EventStream sin = program.getInputStreams().iterator().next();
 
-        send_event(sin, "square1", getAxioms1());
-        send_event(sin, "u1", getAxioms2());
+        OWLNamedIndividual device1 = df.getOWLNamedIndividual(base + "cnc-26142");
+        OWLNamedIndividual device2 = df.getOWLNamedIndividual(base + "cnc-26143");
+
+
+        send_event(sin, "e1", getAxioms2("e1", "105", OWL2Datatype.XSD_DOUBLE, "Temperature", device1), 0);
+        send_event(sin, "e2", getAxioms2("e2", "2020", OWL2Datatype.XSD_DOUBLE, "SpindleSpeed", device2), 10);
+        send_event(sin, "e3", getAxioms2("e3", "4242", OWL2Datatype.XSD_DOUBLE, "SpindleSpeed", device1), 10);
+//        send_event(sin, "cnc-26142", getAxioms2(201, "TactTime"), 0);
+//        send_event(sin, "cnc-26142", getAxioms2(3000, "EnergyConsumption"), 0);
 
         System.out.println("<---------END--------->");
 
@@ -64,16 +82,17 @@ public class Shapes {
 
         OBEPParserOutput q = result.resultValue;
 
+        System.out.println(q);
         //runtime engine and program
 
         return q.asProgram();
     }
 
-    private static void send_event(EventStream sin, String square1, Set<OWLAxiom> axioms1) {
-        RawEvent event = new RawEvent(base + square1);
+    private static void send_event(EventStream sin, String e, Set<OWLAxiom> axioms1, long delay) {
+        RawEvent event = new RawEvent(base + e);
         event.setContent(new ContentAxioms(axioms1));
-        event.setStream_uri("http://www.stream.org/stream1");
-        event.setTimeStamp(System.currentTimeMillis());
+        event.setStream_uri("http://localhost:8112/stream1");
+        event.setTimeStamp(System.currentTimeMillis() + delay);
         sin.put(event);
     }
 
@@ -97,29 +116,31 @@ public class Shapes {
 
     }
 
-    public static Set<OWLAxiom> getAxioms1() {
 
-        OWLClass Square = df.getOWLClass(base + "Square");
-        OWLNamedIndividual b = df.getOWLNamedIndividual(base + "square1");
-        OWLClassAssertionAxiom baB = df.getOWLClassAssertionAxiom(Square, b);
+    //
 
-        Set<OWLAxiom> axioms = new HashSet<>();
-        axioms.add(baB);
 
-        return axioms;
-    }
+    public static Set<OWLAxiom> getAxioms2(String id, String v, OWL2Datatype xsdDouble, String prop, OWLNamedIndividual device) {
+        //Event2: u1 observerdProperty square1 D
 
-    public static Set<OWLAxiom> getAxioms2() {
-        //Event2: u1 rotates square1 D
-        OWLObjectProperty rotates = df.getOWLObjectProperty(base + "rotates");
 
-        OWLNamedIndividual e = df.getOWLNamedIndividual(base + "u1");
-        OWLNamedIndividual f = df.getOWLNamedIndividual(base + "square1");
+//        OWLClassAssertionAxiom baB = df.getOWLClassAssertionAxiom(Device, device);
+//        OWLNamedIndividual p = df.getOWLNamedIndividual(cnc + prop);
+//        OWLObjectPropertyAssertionAxiom eqf = df.getOWLObjectPropertyAssertionAxiom(observerdProperty, device, p);
 
-        OWLObjectPropertyAssertionAxiom eqf = df.getOWLObjectPropertyAssertionAxiom(rotates, e, f);
+        OWLNamedIndividual e = df.getOWLNamedIndividual(cnc + id);
+        OWLClass propertyClass = df.getOWLClass(cnc + prop);
+        OWLClassAssertionAxiom toe = df.getOWLClassAssertionAxiom(propertyClass, e);
+        OWLObjectPropertyAssertionAxiom obs = df.getOWLObjectPropertyAssertionAxiom(observes, device, e);
+        OWLDataPropertyAssertionAxiom def2 = df.getOWLDataPropertyAssertionAxiom(value, e, df.getOWLLiteral(v, xsdDouble));
 
         Set<OWLAxiom> axioms = new HashSet<>();
-        axioms.add(eqf);
+//        axioms.add(eqf);
+//        axioms.add(baB);
+        axioms.add(toe);
+        axioms.add(def2);
+        axioms.add(obs);
+
         return axioms;
 
     }
