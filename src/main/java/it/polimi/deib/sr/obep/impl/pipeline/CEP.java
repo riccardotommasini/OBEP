@@ -1,12 +1,14 @@
 package it.polimi.deib.sr.obep.impl.pipeline;
 
 import com.espertech.esper.client.*;
-import it.polimi.deib.sr.obep.impl.RawEvent;
 import it.polimi.deib.sr.obep.core.pipeline.processors.EventProcessor;
 import it.polimi.deib.sr.obep.core.pipeline.processors.EventStreamManager;
+import it.polimi.deib.sr.obep.impl.RawEvent;
 import lombok.extern.log4j.Log4j;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,6 +20,7 @@ public class CEP implements EventProcessor, EventStreamManager {
     private EPServiceProvider epService;
     private EPAdministrator cepAdm;
     private final EPRuntime cep;
+    private List<String> registered_events = new ArrayList<>();
 
     public CEP() {
         Map<String, Object> properties = new HashMap<>();
@@ -62,7 +65,10 @@ public class CEP implements EventProcessor, EventStreamManager {
         //TODO refactor the event definition
         String stream = se.getContext() + "_" + stripFilterName(se.getType().toStringID());
         System.out.println("Sending an [" + stream + "]");
-        this.cep.sendEvent(se, stripFilterName(stream));
+        String mapEventTypeName = stripFilterName(stream);
+        if (registered_events.contains(mapEventTypeName))
+            this.cep.sendEvent(se, mapEventTypeName);
+
     }
 
     @Override
@@ -81,5 +87,9 @@ public class CEP implements EventProcessor, EventStreamManager {
     public EPStatement register_event_pattern_stream(String pattern) {
         log.info(pattern);
         return this.cepAdm.createEPL(pattern);
+    }
+
+    public void register_event(String name1) {
+        registered_events.add(name1);
     }
 }

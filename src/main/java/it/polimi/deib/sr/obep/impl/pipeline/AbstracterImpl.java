@@ -69,7 +69,8 @@ public class AbstracterImpl implements Abstracter {
 
 
             OWLNamedIndividual eventInvididual = e.getEventInvididual();
-            lift(copy, eventInvididual).forEach(c -> {
+            Set<OWLClass> lift = lift(copy, eventInvididual);
+            lift.forEach(c -> {
                 RawEvent event = e.copy();
                 event.put(abstracter_time, System.currentTimeMillis());
                 event.setType(c);

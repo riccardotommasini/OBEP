@@ -18,12 +18,11 @@ import java.util.*;
 /**
  * Created by Riccardo on 17/08/16.
  */
-@Data
 public class CompositeEventDeclaration extends ComplexEventDeclaration {
 
     private PatternDeclaration expr;
-    private List<NormalFormDeclaration> filter_events;
-    private List<NormalFormDeclaration> filters_var;
+    private List<NormalFormDeclaration> filter_events = new ArrayList<>();
+    private List<NormalFormDeclaration> filters_var = new ArrayList<>();
     private List<ElementFilter> filters = new ArrayList<>();
     private Map<String, String> var_named = new HashMap<>();
     private Map<String, String> aliases = new HashMap<>();
@@ -117,5 +116,21 @@ public class CompositeEventDeclaration extends ComplexEventDeclaration {
 
     public Map<String, String> getVariableAliases() {
         return aliases;
+    }
+
+    public PatternDeclaration getExpr() {
+        return expr;
+    }
+
+    public void setExpr(PatternDeclaration expr) {
+        this.expr = expr;
+    }
+
+    public List<NormalFormDeclaration> getFilter_events() {
+        return filter_events;
+    }
+
+    public void setFilter_events(List<NormalFormDeclaration> filter_events) {
+        this.filter_events = filter_events;
     }
 }

@@ -179,6 +179,10 @@ public class PatternDeclaration {
                         return createFilter(ctx, i, filters_event);
                     }
                 }
+            } else {
+                String varName = this.var.getLocalName();
+                aliases.put(varName, varName + 0);
+                return Patterns.filter(ctx + "_" + varName, this.name = varName + 0);
             }
         }
 

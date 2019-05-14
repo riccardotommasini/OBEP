@@ -230,7 +230,8 @@ public class OBEPParserOutput extends SPARQLQuery implements ProgramDeclaration 
                     .map(ced -> {
                         log.info(ced.toEpl());
                         Map<String, NormalForm> normalforms = new HashMap<>();
-                        ced.getFilter_events().forEach(nfd -> {
+                        List<NormalFormDeclaration> filter_events = ced.getFilter_events();
+                        filter_events.forEach(nfd -> {
                             IRI name = IRI.create(nfd.getVar().getURI());
                             IRI ctx = IRI.create(nfd.getContext());
 

@@ -1,7 +1,6 @@
 package it.polimi.deib.sr.obep.impl;
 
 import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.soda.*;
 import it.polimi.deib.sr.obep.core.OBEPEngine;
 import it.polimi.deib.sr.obep.core.pipeline.abstration.Abstracter;
@@ -14,6 +13,7 @@ import it.polimi.deib.sr.obep.core.programming.ProgramManager;
 import it.polimi.deib.sr.obep.impl.content.MergeContentExpression;
 import it.polimi.deib.sr.obep.impl.pipeline.AbstracterImpl;
 import it.polimi.deib.sr.obep.impl.pipeline.CEP;
+import it.polimi.deib.sr.obep.impl.pipeline.EPLFactory;
 import it.polimi.deib.sr.obep.impl.pipeline.SPARQLNormalizer;
 import it.polimi.deib.sr.obep.impl.programming.ProgramManagerImpl;
 import lombok.extern.log4j.Log4j;
@@ -98,15 +98,18 @@ public class OBEPEngineImpl implements OBEPEngine {
                 ontology_builder.add(axiom);
 
                 Arrays.stream(ce.named()).forEach(name -> {
-
+                    String name1 = ce.getHead() + "_" + name;
                     NormalForm nf = ce.normal_forms().get(name);
-
-                    String new_event = nf.toString();
-
+                    String new_event;
+                    if (nf != null) {
+                        new_event = nf.toString();
+                        active_normal_forms.put(nf.event(), nf);
+                    } else {
+                        new_event = EPLFactory.toEPLSchema(name1, new ArrayList<>(), name);
+                    }
+                    cep.register_event(name1);
                     epl_program_builder.add(new_event);
                     cep.register_event_schema(new_event);
-
-                    active_normal_forms.put(nf.event(), nf);
 
                 });
 
