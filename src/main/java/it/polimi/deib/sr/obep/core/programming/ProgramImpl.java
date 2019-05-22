@@ -19,7 +19,7 @@ public final class ProgramImpl implements Program {
 
     private final OWLOntology dbox;
 
-    private final Set<EventStream> inputstreams;
+    private final Set<String> inputstreams;
 
     private final Set<LogicalEvent> logicalEvents;
     private final Set<CompositeEvent> compositeEvents;
@@ -37,7 +37,7 @@ public final class ProgramImpl implements Program {
     }
 
     @Override
-    public Set<EventStream> getInputStreams() {
+    public Set<String> getInputStreams() {
         return inputstreams;
     }
 

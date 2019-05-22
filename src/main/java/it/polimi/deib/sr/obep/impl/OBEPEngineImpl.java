@@ -3,6 +3,7 @@ package it.polimi.deib.sr.obep.impl;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.soda.*;
 import it.polimi.deib.sr.obep.core.OBEPEngine;
+import it.polimi.deib.sr.obep.core.data.streams.EventStream;
 import it.polimi.deib.sr.obep.core.pipeline.abstration.Abstracter;
 import it.polimi.deib.sr.obep.core.pipeline.normalization.NormalForm;
 import it.polimi.deib.sr.obep.core.pipeline.normalization.Normalizer;
@@ -35,6 +36,11 @@ public class OBEPEngineImpl implements OBEPEngine {
     public OBEPEngineImpl(IRI base) {
         this.base = base;
         this.cep = new CEP();
+    }
+
+    @Override
+    public EventStream register(String uri) {
+        return null;
     }
 
     @Override
@@ -145,12 +151,10 @@ public class OBEPEngineImpl implements OBEPEngine {
                     .pipe(normalizer).pipe(cep));
 
             //CONNECT INPUT AND OUTPUTS STREAMS
-            q.getInputStreams().forEach(s -> s.connectTo(abstracter));
 
             q.getOutputStreams().forEach(s -> cep.register_event_pattern_stream(connectToOut(epl_out_program_builder, s, new String[]{})));
 
             EPStatement epStatement = cep.register_event_pattern_stream(out_pattern);
-
 
             System.out.println(epl_program_builder.toString());
             StringJoiner add = epl_out_program_builder.add(out_pattern);
@@ -188,24 +192,6 @@ public class OBEPEngineImpl implements OBEPEngine {
     private String connectToOut(StringJoiner output_stream_builder, String head, String[] projections) {
         return connectTo(output_stream_builder, "", outStream, head, projections);
     }
-
-    @Override
-    public ProgramExecution register(String q) {
-        return register(manager.parse(q));
-    }
-
-//    public void sendEvent(RawEvent se) {
-//        //TODO add check controls
-//        if (se.getTriggeredFilterIRIs() == null) {
-//            abstracter.lift(se);
-//        }
-//        if (se.getTriggeredFilterIRIs() != null && !se.getTriggeredFilterIRIs().isEmpty() && se.getProperties() == null) {
-//            extractor.normalize(se);
-//        }
-//        if (se.getProperties() != null) {
-//            cep.sendEvent(se);
-//        }
-//    }
 
     public MergeContentExpression merge(String... moreProperties) {
         return new MergeContentExpression(moreProperties);

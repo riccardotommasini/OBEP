@@ -1,6 +1,7 @@
 package it.polimi.deib.sr.obep.core;
 
 
+import it.polimi.deib.sr.obep.core.data.streams.EventStream;
 import it.polimi.deib.sr.obep.core.programming.Program;
 import it.polimi.deib.sr.obep.core.programming.ProgramExecution;
 
@@ -9,8 +10,8 @@ import it.polimi.deib.sr.obep.core.programming.ProgramExecution;
  */
 public interface OBEPEngine {
 
-    ProgramExecution register(Program q);
+    EventStream register(String uri);
 
-    ProgramExecution register(String q);
+    ProgramExecution register(Program q);
 
 }

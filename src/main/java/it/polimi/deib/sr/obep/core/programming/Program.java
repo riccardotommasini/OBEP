@@ -17,7 +17,7 @@ public interface Program {
 
     Set<Prefix> getPrefixes();
 
-    Set<EventStream> getInputStreams();
+    Set<String> getInputStreams();
 
     Set<? extends LogicalEvent> getLogicalEvents();
 

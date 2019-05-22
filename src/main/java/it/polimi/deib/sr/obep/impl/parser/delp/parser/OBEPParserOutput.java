@@ -195,7 +195,7 @@ public class OBEPParserOutput extends SPARQLQuery implements ProgramDeclaration 
 
             //Setup Input Streams
 
-            Set<EventStream> inputstreams = q.getStreamUris().stream().map(EventStreamImpl::new).collect(Collectors.toSet());
+            Set<String> inputstreams = new HashSet<>(q.getStreamUris());
 
             //ADD Logical Event Axioms from LE declarations
             logicalEvents.stream().map(ComplexEventDeclaration::getHead).map(df::getOWLDeclarationAxiom).forEach(dbox::addAxiom);

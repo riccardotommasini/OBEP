@@ -3,6 +3,7 @@ package examples;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EventBean;
+import it.polimi.deib.sr.obep.core.data.streams.EventStreamImpl;
 import it.polimi.deib.sr.obep.core.programming.ProgramExecution;
 import it.polimi.deib.sr.obep.core.programming.ProgramExecutionImpl;
 import it.polimi.deib.sr.obep.core.programming.ResultFormatter;
@@ -70,7 +71,7 @@ public class Shapes {
         //TODO events may come from different streams, but at this point we don't care
         //OBEP is single stream in the logic. However, this might be an advantage in the sense
         //that it can be used for handling partitions
-        EventStream sin = program.getInputStreams().iterator().next();
+        EventStream sin = new EventStreamImpl(program.getInputStreams().iterator().next());
 
         send_event(sin, "square1", getAxioms1());
         send_event(sin, "u1", getAxioms2());

@@ -2,6 +2,7 @@ package examples;
 
 import it.polimi.deib.sr.obep.core.OBEPEngine;
 import it.polimi.deib.sr.obep.core.data.streams.EventStream;
+import it.polimi.deib.sr.obep.core.data.streams.EventStreamImpl;
 import it.polimi.deib.sr.obep.core.programming.Program;
 import it.polimi.deib.sr.obep.impl.OBEPEngineImpl;
 import it.polimi.deib.sr.obep.impl.RawEvent;
@@ -55,7 +56,7 @@ public class CNC {
 
         //runtime parser
 
-        EventStream sin = program.getInputStreams().iterator().next();
+        EventStream sin = new EventStreamImpl(program.getInputStreams().iterator().next());
 
         OWLNamedIndividual device1 = df.getOWLNamedIndividual(base + "cnc-26142");
         OWLNamedIndividual device2 = df.getOWLNamedIndividual(base + "cnc-26143");

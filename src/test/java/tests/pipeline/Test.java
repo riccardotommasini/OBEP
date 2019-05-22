@@ -82,9 +82,10 @@ public class Test {
         Set<Prefix> prefixes = new HashSet<>();
         prefixes.add(new Prefix("", base.getIRIString()));
 
-        Set<EventStream> inputs = new HashSet<>();
-        EventStreamImpl sin = new EventStreamImpl("test1");
-        inputs.add(sin);
+        Set<String> inputs = new HashSet<>();
+        inputs.add("test1");
+
+        EventStream sin = new EventStreamImpl("test1");
 
         //NAMED
         Set<String> outputs = new HashSet<>();
@@ -139,7 +140,7 @@ public class Test {
             }
 
             @Override
-            public Set<EventStream> getInputStreams() {
+            public Set<String> getInputStreams() {
                 return inputs;
             }
 
